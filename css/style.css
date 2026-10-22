@@ -1,0 +1,728 @@
+:root {
+  --black: #000;
+  --white: #fff;
+  --orange: #fc6030;
+  --red: #ff3c00;
+  --gray: #555;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { background: var(--white); }
+
+body {
+  overflow-x: hidden;
+}
+
+#page {
+  width: 1280px;
+  overflow: hidden;
+}
+
+#page-inner {
+  width: 1280px;
+  transform-origin: 0 0;
+}
+
+.sec {
+  position: relative;
+  width: 1280px;
+  height: 832px;
+  overflow: hidden;
+}
+
+.sec-white { background: var(--white); color: var(--black); }
+.sec-dark  { background: var(--black); color: var(--white); }
+.sec-dark .body16, .sec-dark .lead20 { color: var(--white); }
+
+/* ---------- typography ---------- */
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+.sec {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.sec p { font-family: 'Arsenal', serif; }
+
+.h40 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 110%;
+}
+.med { font-weight: 500; }
+.caps { text-transform: uppercase; line-height: 130%; }
+
+.lead20 { font-size: 20px; line-height: 125%; color: var(--black); }
+.lead18 { font-size: 18px; line-height: 125%; color: var(--black); }
+
+.body16 {
+  font-family: 'Arsenal', serif;
+  font-size: 16px;
+  line-height: 125%;
+  color: var(--black);
+}
+
+/* ---------- primitives ---------- */
+
+.rule {
+  border: none;
+  border-top: 1px solid var(--black);
+  position: absolute;
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid var(--black);
+  position: absolute;
+  left: 100px;
+  width: 1080px;
+}
+
+.orange-rule {
+  border: none;
+  border-top: 2px solid var(--orange);
+  position: absolute;
+  left: 100px;
+  width: 1080px;
+}
+
+.dot {
+  position: absolute;
+  width: 18px; height: 18px;
+  background: var(--black);
+  border-radius: 50%;
+}
+.dot-white   { background: var(--white); width: 20px; height: 20px; }
+.dot-orange  { background: var(--orange); width: 20px; height: 20px; }
+
+.ann {
+  position: absolute;
+  background: var(--black);
+  height: 1px;
+  transform-origin: 0 0;
+}
+.ann.o { background: var(--orange); }
+.ann.v {
+  width: 1px;
+}
+
+.pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 8px;
+  color: var(--gray);
+  border: 1px solid var(--gray);
+  border-radius: 120px;
+  padding: 7px 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+.corner-dot {
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--black);
+  border-radius: 10px;
+}
+
+/* ---------- widgets (chat) ---------- */
+
+.widget {
+  position: absolute;
+  width: 340px;
+  padding: 15px 16px;
+  z-index: 1;
+}
+.widget-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  font-weight: 300;
+  margin-bottom: 12px;
+}
+.widget-x {
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+}
+.wx { flex: none; }
+.widget-note {
+  font-family: 'Arsenal', serif;
+  font-size: 20px;
+  line-height: 110%;
+}
+.w-orange { background: var(--orange); color: var(--white); }
+.w-gray   { background: var(--gray);   color: var(--white); }
+.w-white  { background: var(--white);  color: var(--black); border: 1px solid var(--black); }
+
+/* =========================================================
+   1. HERO
+========================================================= */
+
+.sec-hero { padding: 50px 100px 0; }
+
+.hero-title {
+  font-size: 100px;
+  font-weight: 400;
+  line-height: 90%;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--black);
+  width: 1080px;
+}
+
+.hero-sub {
+  position: absolute;
+  left: 842px; top: 185px;
+  width: 336px;            /* правый край = 1176, как в макете */
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px; font-weight: 500;
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 117%;
+  color: var(--red);
+}
+
+.hero-grid {
+  position: absolute;
+  left: 100px; top: 473px;
+  display: grid;
+  grid-template-columns: 340px 340px 340px;
+  column-gap: 30px;
+}
+.hero-col { position: relative; }
+.hero-num {
+  font-size: 64px;
+  color: var(--orange);
+  margin-bottom: 22px;
+}
+.hero-col .rule { position: static; margin: 0; }
+.hero-q {
+  font-size: 20px;
+  margin: 30px 0 14px;
+  min-height: 92px;
+}
+.hero-tags { margin-top: 37px; }
+
+/* жёсткая привязка линий и декора к координатам макета */
+.hero-col .rule { position: absolute; width: 337px; left: 0; }
+.hero-col:nth-child(2) .rule { width: 334px; left: 3px; }
+.hero-col .rule.r1 { top: 84px; }   /* 556 - 473 + 3 */
+.hero-col .rule.r2 { top: 219px; }  /* 692 - 473 */
+
+/* =========================================================
+   2/5. DARK STATEMENTS
+========================================================= */
+
+.statement-40 {
+  position: absolute;
+  left: 526px; top: 403px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px;
+  width: 720px;
+}
+.sec-statement .dot-white { left: 470px; top: 407px; }
+
+.sec-statement2 .statement-40 {
+  left: 193px; top: 364px;
+  width: 894px;
+  text-align: center;
+}
+
+/* =========================================================
+   3. CHECK SECTION
+========================================================= */
+
+  .sec-check .h40 { position: absolute; left: 100px; top: 80px; width: 540px; }
+.sec-check .lead20 { position: absolute; left: 100px; top: 198px; width: 600px; }
+
+/* =========================================================
+   4. BENEFITS
+========================================================= */
+
+.sec-benefits .h40 { position: absolute; left: 100px; top: 40px; }
+
+.orange-bg {
+  position: absolute;
+  background: var(--orange);
+}
+
+.benefit { position: absolute; width: 340px; }
+.benefit.on-orange { color: var(--black); }
+.benefit-num {
+  font-size: 64px;
+  color: var(--orange);
+  margin-bottom: 30px;
+}
+.benefit.on-orange .benefit-num { color: var(--white); }
+.benefit-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 23px; font-weight: 500;
+  text-transform: uppercase;
+  margin: 18px 0 20px;
+}
+.benefit-p { font-size: 18px; line-height: 125%; }
+
+/* =========================================================
+   6. CARD
+========================================================= */
+
+.card-frame {
+  position: absolute;
+  left: 285px; top: 181px;
+  width: 711px; height: 470px;
+  border: 1px solid var(--orange);
+}
+.corner {
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--orange);
+  border-radius: 60px;
+}
+.c-tl { left: 275px; top: 171px; }
+.c-tr { left: 986px; top: 171px; }
+.c-bl { left: 275px; top: 641px; }
+.c-br { left: 986px; top: 641px; }
+
+.card-photo {
+  position: absolute;
+  left: 433px; top: 291px;
+  width: 446px; height: 561px;
+  object-fit: cover;
+}
+.card-circle {
+  position: absolute;
+  left: 456px; top: 310px;
+  width: 223px; height: 225px;
+  border-radius: 50%;
+  background: var(--white);
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+}
+
+.card-num {
+  position: absolute;
+  left: 334px; top: 291px;
+  font-size: 128px;
+  color: var(--white);
+  mix-blend-mode: difference;
+}
+.card-mini {
+  position: absolute;
+  left: 575px; top: 328px;
+  display: flex;
+  align-items: baseline;
+  font-size: 12px;
+  color: var(--gray);
+  letter-spacing: 10%;
+}
+.card-mini .br {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  color: var(--orange);
+}
+.card-h {
+  position: absolute;
+  left: 575px; top: 389px;
+  font-size: 32px; font-weight: 400;
+}
+.card-p {
+  position: absolute;
+  left: 575px; top: 461px;
+  width: 460px;
+  font-size: 16px;
+  color: var(--white);
+}
+
+/* =========================================================
+   7. SCIENTISTS
+========================================================= */
+
+.sci-title {
+  position: absolute;
+  left: 100px; top: 54px;
+  font-size: 42px; font-weight: 500;
+  line-height: 62px;
+  letter-spacing: 0.113em;
+  text-transform: uppercase;
+}
+.lines-svg { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; }
+
+.sci-pills { position: absolute; left: 100px; top: 286px; width: 420px; }
+.sci-body {
+  position: absolute;
+  left: 466px; top: 283px;
+  width: 712px;
+  font-size: 17px;
+  line-height: 169%;
+}
+.sci-body .orange { color: var(--orange); font-family: 'Arsenal', serif; }
+.sci-body b { font-weight: 700; }
+
+.sci-panel {
+  position: absolute;
+  left: 100px; top: 433px;
+  width: 1080px; height: 350px;
+  background: var(--black);
+  border: 2px solid var(--black);
+}
+.sci-mask {
+  position: absolute;
+  left: 100px; top: 433px;
+  width: 1080px; height: 350px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 96px, #000 140px, #000 330px, transparent 365px), linear-gradient(to bottom, transparent 62px, #000 80px, #000 75%, rgba(0,0,0,0.35) 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent 96px, #000 140px, #000 330px, transparent 365px), linear-gradient(to bottom, transparent 62px, #000 80px, #000 75%, rgba(0,0,0,0.35) 100%);
+  mask-composite: intersect;
+}
+.sci-questions {
+  position: absolute;
+  left: 96px; top: 55px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 45px;
+  line-height: 59px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--white);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* =========================================================
+   8. TEARDOWN
+========================================================= */
+
+.sec-teardown { background: var(--white); }
+
+.td-bar {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 70px;
+  background: var(--black);
+  color: var(--white);
+  font-size: 32px; font-weight: 500;
+  letter-spacing: 35%;
+  text-align: center;
+  line-height: 70px;
+}
+
+.td-left {
+  position: absolute;
+  left: 0; top: 70px;
+  width: 413px; height: 762px;
+  background: var(--black);
+}
+.td-post-title {
+  position: absolute;
+  left: 40px; top: 40px;
+  width: 333px;
+  font-size: 20px;
+  line-height: 130%;
+  color: var(--white);
+}
+.td-img {
+  position: absolute;
+  left: 40px; top: 160px;
+  width: 334px; height: 552px;
+  border: 1px solid var(--gray);
+  object-fit: cover;
+}
+.td-img-label {
+  position: absolute;
+  left: 187px; top: 468px;
+  font-size: 16px; font-weight: 600;
+  color: var(--white);
+}
+
+.td-lead {
+  position: absolute;
+  left: 491px; top: 110px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  line-height: 130%;
+}
+
+.tag-label {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--orange);
+}
+
+.td-tabs { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.td-tab {
+  position: absolute;
+  top: 250px;
+  width: 20px;
+  height: 210px;
+}
+.tab-sq {
+  position: absolute;
+  left: 0; top: 0;
+  display: block;
+  width: 14px; height: 14px;
+  border: 1px solid var(--orange);
+  border-radius: 50%;
+}
+.tab-sq.active { background: var(--orange); }
+.tab-label {
+  position: absolute;
+  left: 12px;
+  top: -28px;
+  line-height: 14px;
+  transform: rotate(-90deg);
+  transform-origin: 0 100%;
+  font-size: 20px;
+  color: var(--black);
+  white-space: nowrap;
+}
+
+.td-article {
+  position: absolute;
+  left: 491px; top: 311px;
+  width: 605px;
+  font-family: 'Arsenal', serif;
+  font-size: 16px;
+  line-height: 135%;
+}
+.td-article p { margin-bottom: 19px; }
+.td-article p:first-child { font-weight: 400; }
+
+.td-strip {
+  position: absolute;
+  top: 70px;
+  width: 45px; height: 762px;
+  border: 1px solid var(--black);
+  border-right: none;
+}
+
+/* =========================================================
+   9. VERDICT
+========================================================= */
+
+.sec-verdict { background: var(--orange); }
+
+.vd-dot {
+  position: absolute;
+  left: 196px; top: 101px;
+  width: 26px; height: 26px;
+  background: var(--white);
+  border-radius: 50%;
+}
+.vd-label {
+  position: absolute;
+  left: 222px; top: 100px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px;
+  line-height: 130%;
+  color: var(--white);
+}
+
+.sec-verdict .td-tab { top: 249px; }
+.vd-strip { position: absolute; left: 0; top: 70px; width: 135px; height: 762px; background: var(--white); }
+.vd-strip::after { content: ""; position: absolute; right: -1px; top: 0; width: 0; height: 100%; border-right: 1px solid var(--black); }
+.vd-strip::before { content: ""; position: absolute; top: 0; bottom: 0; width: 1px; background: var(--black); }
+.vd-strip::before { left: 45px; box-shadow: 45px 0 0 var(--black), 90px 0 0 var(--black); }
+.sec-verdict .tab-sq { border-color: var(--orange); background: var(--white); }
+.sec-verdict .tab-sq.active { background: var(--white); border-color: transparent; }
+.sec-verdict .tab-label { color: var(--black); }
+.sec-verdict .td-tab:last-child .tab-sq { background: var(--white); border: none; }
+.sec-verdict .td-tab:last-child .tab-label { color: var(--white); }
+.sec-verdict .tab-label { color: var(--black); }
+
+.vd-main {
+  position: absolute;
+  left: 280px; top: 390px;
+  width: 720px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px;
+  color: var(--white);
+}
+
+/* =========================================================
+   10. CHECKLIST
+========================================================= */
+
+.sec-checklist {
+  background: var(--white);
+  height: 3903px;
+}
+
+.cl-ticker {
+  position: absolute;
+  left: 100px; top: 118px;
+  width: 1080px;
+  font-size: 44px; font-weight: 500;
+  line-height: 130%;
+  white-space: nowrap;
+}
+.ctx-inline .br {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 40px;
+  color: var(--orange);
+}
+
+.cl-title {
+  position: absolute;
+  left: 100px; top: 300px;
+  font-size: 36px; font-weight: 500;
+  line-height: 130%;
+  width: 463px;
+}
+
+.cl-intro { position: absolute; left: 100px; top: 424px; width: 463px; }
+
+.cl-item { position: absolute; width: 463px; }
+.cl-num {
+  font-size: 80px;
+  line-height: 1;
+  margin-top: -14px;
+  color: var(--orange);
+}
+.cl-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 29px; font-weight: 500;
+  line-height: 125%;
+  margin: 59px 0 0;
+}
+.cl-quote-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 28px;
+}
+.cl-quote-mark {
+  font-family: 'IBM Plex Mono', monospace;
+  font-style: italic;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--orange);
+  transform: translateY(2px);
+}
+.cl-quote {
+  font-style: italic;
+  font-size: 20px;
+  line-height: 130%;
+  color: var(--orange);
+}
+.cl-body {
+  font-size: 20px;
+  line-height: 125%;
+  margin-top: 30px;
+}
+
+.cl-blackband {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 1280px; height: 832px;
+  background: var(--black);
+}
+
+/* =========================================================
+   11. DECOR (наука стала декорацией)
+========================================================= */
+
+.sec-decor .h40 { position: absolute; left: 100px; top: 80px; }
+.sec-decor .lead20 { position: absolute; left: 100px; top: 154px; width: 500px; }
+.sec-decor .hero-tags { margin-top: 0; }
+
+/* =========================================================
+   12. FINALE
+========================================================= */
+
+.fin-lead {
+  position: absolute;
+  left: 100px; top: 70px;
+  width: 463px;
+}
+.fin-right {
+  position: absolute;
+  left: 717px; top: 491px;
+  width: 463px;
+  text-align: right;
+}
+
+.giant-ctx {
+  position: absolute;
+  left: 100px; top: 560px;
+  width: 1080px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 145px;
+  font-weight: 400;
+  line-height: 130%;
+  letter-spacing: 10%;
+}
+.giant-ctx .br {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 128px;
+  color: var(--orange);
+}
+
+/* =========================================================
+   11b. ВЫВОД (orange) + 11c. ВЫВОД (white detail)
+========================================================= */
+
+.sec-conclusion { background: var(--orange); color: var(--white); }
+.sec-concl2 { background: var(--white); }
+
+.concl-frame {
+  position: absolute;
+  left: 274px; top: 281px;
+  width: 711px; height: 250px;
+  border: 1px solid var(--white);
+}
+.cf-dot {
+  position: absolute;
+  width: 20px; height: 20px;
+  background: var(--white);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.concl-title {
+  position: absolute;
+  left: 120px; top: 108px;
+  width: 500px;
+  font-family: 'IBM Plex Mono', monospace !important;
+  font-size: 31px;
+  line-height: 72%;
+  color: var(--white);
+  white-space: nowrap;
+}
+.concl-pill {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  line-height: 14px;
+  color: var(--white);
+  background: var(--orange);
+  border: 1px solid var(--white);
+  border-radius: 120px;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+.concl-pill.inv {
+  color: var(--orange);
+  background: var(--white);
+  border-color: var(--orange);
+}
+
+.cl-line { position: absolute; left: 666px; top: 0; }
+.concl-quote {
+  position: absolute;
+  font-family: 'Arsenal', serif;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 125%;
+  color: var(--orange);
+}
