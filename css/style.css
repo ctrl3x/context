@@ -433,13 +433,6 @@ body {
   border: 1px solid var(--gray);
   object-fit: cover;
 }
-.td-img-label {
-  position: absolute;
-  left: 187px; top: 468px;
-  font-size: 16px; font-weight: 600;
-  color: var(--white);
-}
-
 .td-lead {
   position: absolute;
   left: 491px; top: 110px;

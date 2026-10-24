@@ -5,7 +5,9 @@
 <path d="M578.5 782 L1180.472395926382 212.02611064834616" stroke="black"/>
 <path d="M710.5 1402 L569.4973169038217 814.9975014025249" stroke="black"/>
 <path d="M709.5 2652 L569.4966960964616 2064.963949236426" stroke="black"/>
-<path d="M664.5 3902 L568.5009864915598 3314.998101020613" stroke="black"/>
+<path d="M826 3733 L568.5009864915598 3314.998101020613" stroke="black"/>
+<circle cx="826" cy="3733" r="10" fill="black"/>
+<path d="M826 3743 L826 3902" stroke="black"/>
 <circle cx="715" cy="1421" r="10" fill="black"/>
 <circle cx="715" cy="2671" r="10" fill="black"/>
 <circle cx="565" cy="796" r="10" fill="black"/>
