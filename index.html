@@ -8,6 +8,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Arsenal:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<script>
+(function () {
+  var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  var isReload = !nav || nav.type === 'reload';
+  if (!isReload) return;
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('load', function () {
+    if (/#(hero|card|td)-step\d$/.test(location.hash)) return;
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
 </head>
 <body>
 <div id="page">
@@ -15,10 +27,11 @@
 
 <!-- 1. HERO -->
 <section class="sec sec-hero">
-  <h1 class="hero-title">КАК МЕДИА ИСКАЖАЮТ ИССЛЕДОВАНИЯ</h1>
-  <p class="hero-sub">От первого громкого тезиса<br>до тотального недоверия</p>
+  <div class="hero-content">
+    <h1 class="hero-title">КАК МЕДИА ИСКАЖАЮТ ИССЛЕДОВАНИЯ</h1>
+    <p class="hero-sub">От первого громкого тезиса<br>до тотального недоверия</p>
 
-  <div class="hero-grid">
+    <div class="hero-grid">
     <div class="hero-col">
       <div class="hero-num">01</div>
       <p class="hero-q">Почему мы доверяем формулировкам «учёные доказали» и «исследование показало» без проверки источника?</p>
@@ -46,13 +59,64 @@
   </div>
 
   <img class="lines-svg" src="assets/svg/hero.svg" alt="">
+  </div>
+
+  <!-- hero intro story: появляется по щелчкам колесика -->
+  <div class="hero-glass"></div>
+
+  <div class="hero-widget w-orange w1" style="left:223px;top:392px;">
+    <div class="w-head">
+      <span class="w-title">...</span>
+      <svg class="w-close" role="button" aria-label="Закрыть" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor"/></svg>
+    </div>
+    <p class="w-text">Мы привыкли доверять заголовкам</p>
+  </div>
+
+  <div class="hero-widget w-white w2" style="left:377px;top:297px;">
+    <div class="w-head">
+      <span class="w-title">«»</span>
+      <svg class="w-close" role="button" aria-label="Закрыть" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor"/></svg>
+    </div>
+    <p class="w-text">Ссылка на «исследование» казалась самым надёжным аргументом</p>
+  </div>
+
+  <div class="hero-widget w-gray w3" style="left:549px;top:427px;">
+    <div class="w-head">
+      <span class="w-title">##</span>
+      <svg class="w-close" role="button" aria-label="Закрыть" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor"/></svg>
+    </div>
+    <p class="w-text">За ней стоят эксперты, данные и проверки</p>
+  </div>
+
+  <div class="hero-widget w-black w4" style="left:701px;top:327px;">
+    <div class="w-head">
+      <span class="w-title wide">{}</span>
+      <svg class="w-close" role="button" aria-label="Закрыть" width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor"/></svg>
+    </div>
+    <p class="w-text">Вырванное из контекста стирает грань между открытием и манипуляцией</p>
+  </div>
 </section>
 
-<!-- 2. BLACK STATEMENT -->
+<!-- 2. BLACK STATEMENT (пинится скроллом, элементы рулятся скрабом) -->
+<div class="statement-pin">
 <section class="sec sec-dark sec-statement">
   <div class="dot dot-white"></div>
+  <span class="dot dot-white dot-piece p1"></span>
+  <span class="dot dot-white dot-piece p2"></span>
+  <span class="dot circle-dot pair5a" style="left:330px;top:405.31px;"></span>
+  <span class="dot circle-dot pair5b" style="left:928.62px;top:405.31px;"></span>
+  <span class="dot circle-dot pair2a" style="left:650.69px;top:106px;"></span>
+  <span class="dot circle-dot pair2b" style="left:650.69px;top:704.62px;"></span>
+  <span class="dot circle-dot pair3a" style="left:804.26px;top:152.88px;"></span>
+  <span class="dot circle-dot pair3b" style="left:504.95px;top:671.30px;"></span>
+  <span class="dot circle-dot pair4a" style="left:913.81px;top:270.26px;"></span>
+  <span class="dot circle-dot pair4b" style="left:785.74px;top:689.81px;"></span>
+  <span class="dot circle-dot pair1a" style="left:486.43px;top:171.39px;"></span>
+  <span class="dot circle-dot pair1b" style="left:903.12px;top:580.26px;"></span>
   <p class="statement-40">Не спешите верить заголовку, задайтесь вопросом</p>
+  <p class="statement-question">Учёные доказали<br>или нам так сказали?</p>
 </section>
+</div>
 
 <!-- 3. ПРОВЕРЯТЬ -->
 <section class="sec sec-white sec-check">
@@ -86,33 +150,37 @@
   <h2 class="h40 med caps">Не верьте всему,<br>но и не пропускайте важное</h2>
   <p class="lead18" style="position:absolute;left:100px;top:150px;width:620px;">Каждый день мы видим десятки «научных» новостей. Проверка нужна не для того, чтобы сомневаться во всём, а чтобы понимать, на что действительно стоит обратить внимание.</p>
 
-  <div class="benefit-cell orange-bg" style="left:825px;top:269px;width:455px;height:257px;"></div>
-
+  <div class="benefit-cell" style="left:100px;top:269px;width:355px;height:257px;"></div>
   <div class="benefit" style="left:100px;top:269px;">
     <div class="benefit-num">01/</div>
     <h3 class="benefit-h">Меньше шума</h3>
     <p class="benefit-p">Отсекайте кликбейт, домыслы и выводы, которых нет в источнике.</p>
   </div>
+  <div class="benefit-cell" style="left:455px;top:269px;width:370px;height:257px;"></div>
   <div class="benefit" style="left:470px;top:269px;">
     <div class="benefit-num">02/</div>
     <h3 class="benefit-h">Больше ясности</h3>
     <p class="benefit-p">Вместо сложного исследования — короткий вывод: что известно, что пока не доказано и где заканчиваются факты.</p>
   </div>
-  <div class="benefit on-orange" style="left:840px;top:269px;">
+  <div class="benefit-cell" style="left:825px;top:269px;width:455px;height:257px;"></div>
+  <div class="benefit" style="left:840px;top:269px;">
     <div class="benefit-num">03/</div>
     <h3 class="benefit-h">Защита от манипуляций</h3>
     <p class="benefit-p">Громкие слова вроде «учёные доказали» перестают работать как безусловный аргумент.</p>
   </div>
+  <div class="benefit-cell" style="left:100px;top:545px;width:355px;height:237px;"></div>
   <div class="benefit" style="left:100px;top:545px;">
     <div class="benefit-num">04/</div>
     <h3 class="benefit-h">Экономия времени</h3>
     <p class="benefit-p">Не нужно искать первоисточники, сравнивать публикации и расшифровывать научный язык вручную.</p>
   </div>
+  <div class="benefit-cell" style="left:455px;top:545px;width:370px;height:237px;"></div>
   <div class="benefit" style="left:470px;top:545px;">
     <div class="benefit-num">05/</div>
     <h3 class="benefit-h">Меньше ошибок в решениях</h3>
     <p class="benefit-p">Проверка помогает не менять привычки, планы или мнение из-за громкого, но недоказанного заголовка.</p>
   </div>
+  <div class="benefit-cell" style="left:825px;top:545px;width:455px;height:237px;"></div>
   <div class="benefit" style="left:840px;top:545px;">
     <div class="benefit-num">06/</div>
     <h3 class="benefit-h">Сохранять доверие к науке</h3>
@@ -127,14 +195,17 @@
   <p class="statement-40 center w894">Если научный тезис может убедить,<br>он может и ввести в заблуждение</p>
 </section>
 
-<!-- 6. CARD 01 -->
-<section class="sec sec-dark sec-card">
+<!-- 6. CARDS WRAP: фиксированная фото-рука + 4 карточки-ленты -->
+<div class="cards-pin">
+  <div class="cards-photo">
+    <img src="assets/img/photo-hand.png" alt="">
+    <div class="card-circle"></div>
+  </div>
+
+  <section class="sec sec-dark sec-card">
   <div class="card-frame"></div>
   <span class="corner c-tl"></span><span class="corner c-tr"></span>
   <span class="corner c-bl"></span><span class="corner c-br"></span>
-
-  <img class="card-photo" src="assets/img/photo-hand.png" alt="">
-  <div class="card-circle"></div>
 
   <div class="card-num">01</div>
   <div class="card-mini">
@@ -143,6 +214,49 @@
   <h3 class="card-h">Навредить здоровью</h3>
   <p class="card-p">Если человек поверит «научно доказанному» методу лечения, то это может привести к отказу от реальной медицины в пользу исследования из блога</p>
 </section>
+
+<!-- 6b. CARD 02 -->
+<section class="sec sec-dark sec-card">
+  <div class="card-frame"></div>
+  <span class="corner c-tl"></span><span class="corner c-tr"></span>
+  <span class="corner c-bl"></span><span class="corner c-br"></span>
+
+  <div class="card-num">02</div>
+  <div class="card-mini">
+    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+  </div>
+  <h3 class="card-h">Вызвать панику</h3>
+  <p class="card-p" style="width:340px;">Если новость о «опасном» продукте или вирусе разлетится быстрее опровержения, то это может спровоцировать панику, скупку и реальный ущерб</p>
+</section>
+
+<!-- 6c. CARD 03 -->
+<section class="sec sec-dark sec-card">
+  <div class="card-frame"></div>
+  <span class="corner c-tl"></span><span class="corner c-tr"></span>
+  <span class="corner c-bl"></span><span class="corner c-br"></span>
+
+  <div class="card-num">03</div>
+  <div class="card-mini">
+    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+  </div>
+  <h3 class="card-h">Распространить миф</h3>
+  <p class="card-p" style="width:340px;">Если фейк с формулировкой «исследование показало» наберёт охваты, то это может превратить выдумку в «общеизвестный факт»</p>
+</section>
+
+<!-- 6d. CARD 04 -->
+<section class="sec sec-dark sec-card">
+  <div class="card-frame"></div>
+  <span class="corner c-tl"></span><span class="corner c-tr"></span>
+  <span class="corner c-bl"></span><span class="corner c-br"></span>
+
+  <div class="card-num">04</div>
+  <div class="card-mini">
+    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+  </div>
+  <h3 class="card-h">Управлять мнением</h3>
+  <p class="card-p" style="width:340px;">Если громкое «исследование» появляется накануне важного решения, то это может продавить нужную точку зрения миллионам людей</p>
+</section>
+</div>
 
 <!-- 7. УЧЁНЫЕ ДОКАЗАЛИ -->
 <section class="sec sec-white sec-scientists">
@@ -165,57 +279,88 @@
   </div>
 </section>
 
-<!-- 8. TEARDOWN -->
-<section class="sec sec-teardown">
+<!-- 8. TEARDOWN (пин: табы публикация → контекст → первоисточник → вердикт переключаются по порогам скролла, сам переход всегда с фиксированной скоростью) -->
+<div class="td-pin">
+<section class="sec sec-white sec-teardown">
   <div class="td-bar">Учёные доказали: [X]</div>
+
   <div class="td-left">
     <p class="td-post-title">Учёные доказали: [Негативные мысли приводят к деменции]</p>
     <img class="td-img" src="assets/img/post.png" alt="пост">
   </div>
 
-  <p class="td-lead">разбор поста из медиа:</p>
+  <!-- слой: ПУБЛИКАЦИЯ -->
+  <div class="td-view td-pub">
+    <p class="td-lead">разбор поста из медиа:</p>
+
+    <span class="tag-label" style="left:491px;top:172px;">СТРАХ</span>
+    <span class="tag-label" style="left:764px;top:194px;">МАГИЯ</span>
+    <span class="tag-label" style="left:786px;top:438px;">СТРАХ</span>
+    <span class="tag-label" style="left:1067px;top:471px;">МИФ</span>
+    <span class="tag-label" style="left:970px;top:491px;">СТРАХ</span>
+
+    <div class="td-article">
+      <p>Негативные мысли приводят к деменции — регулярное зацикливание на плохом буквально разрушает мозг изнутри.<br>
+      Здоровый мозг сам старается удерживать мышление в более оптимистичном русле, но при намеренном уходе в негатив сильно растёт уровень кортизола — гормон повреждает нейроны, ухудшая когнитивные функции и буквально уничтожая мозг изнутри.</p>
+      <p>Вывод простой: чем больше живёте в плохих мыслях — тем быстрее изнашивается ваш мозг.</p>
+      <p>Думаем только о хорошем.</p>
+    </div>
+  </div>
+
+  <!-- слой: КОНТЕКСТ -->
+  <div class="td-view td-ctx">
+    <h3 class="td2-h" style="left:537px;top:110px;">ПОСТ ПЕРЕСКАЗЫВАЕТ СТАТЬЮ</h3>
+    <p class="td2-p td2-small" style="left:537px;top:156px;width:330px;">статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья</p>
+
+    <img class="td2-img" style="left:927px;top:110px;width:212px;height:195px;" src="assets/img/scheme.png" alt="схема: пост усиливает утверждение статьи">
+
+    <h3 class="td2-h" style="left:537px;top:288px;">ЧТО УТВЕРЖДАЕТ ПОСТ</h3>
+    <p class="td2-p" style="left:537px;top:334px;width:451px;">«Негативные мысли буквально разрушают мозг изнутри»</p>
+
+    <h3 class="td2-h" style="left:537px;top:414px;">ЧТО ГОВОРИТ НАУЧПОП СТАТЬЯ</h3>
+    <p class="td2-p" style="left:537px;top:460px;width:451px;">BBC Science Focus рассказывает о связи повторяющегося негативного мышления с риском деменции и предполагает, что оно может ускорять развитие заболевания.</p>
+
+    <h3 class="td2-h" style="left:537px;top:580px;">ГДЕ ПОСТ ПРЕУВЕЛИЧИВАЕТ</h3>
+    <p class="td2-p" style="left:537px;top:626px;width:451px;">«Повторяющееся негативное мышление» превращается в любые плохие мысли. «Может быть связано с риском» превращается в «приводит к деменции». Предположение о влиянии на мозг становится утверждением о его буквальном разрушении. Добавляется категоричный совет: «Думаем только о хорошем».</p>
+  </div>
+
+  <!-- слой: ПЕРВОИСТОЧНИК -->
+  <div class="td-view td-src">
+    <h3 class="td2-h" style="left:583px;top:110px;">ПОСТ ПЕРЕСКАЗЫВАЕТ СТАТЬЮ</h3>
+    <p class="td2-p td2-small" style="left:583px;top:156px;width:314px;">статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья строится на результатах исследования</p>
+
+    <img class="td2-img" style="left:956px;top:110px;width:241px;height:253px;" src="assets/img/article.png" alt="скриншот статьи BBC Science Focus">
+
+    <h3 class="td2-h" style="left:583px;top:368px;">ЧТО ИСКАЖЕНО</h3>
+    <p class="td2-p" style="left:583px;top:414px;width:435px;">Статья рассказывает о научной <b>гипотезе</b>, связанной с повторяющимся негативным мышлением, но подводит читателя к более уверенному выводу о возможном ускорении деменции.</p>
+
+    <h3 class="td2-h" style="left:583px;top:524px;">ЧТО ГОВОРИТ ИССЛЕДОВАНИЕ</h3>
+    <p class="td2-p" style="left:583px;top:570px;width:435px;">В работе 2020 года обнаружены статистические связи с когнитивным снижением и некоторыми биомаркерами болезни Альцгеймера. Причинность не установлена.</p>
+
+    <h3 class="td2-h" style="left:583px;top:680px;">ГДЕ ГРАНИЦА ДОКАЗАТЕЛЬСТВ</h3>
+    <p class="td2-p" style="left:583px;top:726px;width:444px;">Нельзя заключить, что негативное мышление вызывает деменцию или что отказ от негативных мыслей предотвращает её развитие.</p>
+  </div>
+
+  <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края) -->
+  <div class="td-view td-vd">
+    <p class="vd-main">Выводы искажены и преувеличены</p>
+  </div>
 
   <div class="td-tabs">
-    <div class="td-tab" style="left:428px;"><span class="tab-sq active"></span><span class="tab-label">ПУБЛИКАЦИЯ</span></div>
-    <div class="td-tab" style="left:1154px;"><span class="tab-sq"></span><span class="tab-label">КОНТЕКСТ</span></div>
-    <div class="td-tab" style="left:1200px;"><span class="tab-sq"></span><span class="tab-label">ПЕРВОИСТОЧНИК</span></div>
-    <div class="td-tab" style="left:1248px;"><span class="tab-sq"></span><span class="tab-label">ВЕРДИКТ</span></div>
+    <div class="td-tab tab-pub" style="left:428px;"><span class="tab-sq"></span><span class="tab-label">ПУБЛИКАЦИЯ</span></div>
+    <div class="td-tab tab-ctx" style="left:1154px;"><span class="tab-sq"></span><span class="tab-label">КОНТЕКСТ</span></div>
+    <div class="td-tab tab-src" style="left:1200px;"><span class="tab-sq"></span><span class="tab-label">ПЕРВОИСТОЧНИК</span></div>
+    <div class="td-tab tab-vd" style="left:1248px;"><span class="tab-sq"></span><span class="tab-label">ВЕРДИКТ</span></div>
   </div>
 
-  <span class="tag-label" style="left:491px;top:172px;">СТРАХ</span>
-  <span class="tag-label" style="left:764px;top:194px;">МАГИЯ</span>
-  <span class="tag-label" style="left:786px;top:438px;">СТРАХ</span>
-  <span class="tag-label" style="left:1067px;top:471px;">МИФ</span>
-  <span class="tag-label" style="left:970px;top:491px;">СТРАХ</span>
-
-  <div class="td-article">
-    <p>Негативные мысли приводят к деменции — регулярное зацикливание на плохом буквально разрушает мозг изнутри.<br>
-    Здоровый мозг сам старается удерживать мышление в более оптимистичном русле, но при намеренном уходе в негатив сильно растёт уровень кортизола — гормон повреждает нейроны, ухудшая когнитивные функции и буквально уничтожая мозг изнутри.</p>
-    <p>Вывод простой: чем больше живёте в плохих мыслях — тем быстрее изнашивается ваш мозг.</p>
-    <p>Думаем только о хорошем.</p>
-  </div>
-
-  <span class="td-strip" style="left:413px;"></span>
-  <span class="td-strip" style="left:1138px;"></span>
-  <span class="td-strip" style="left:1184px;"></span>
-  <span class="td-strip" style="left:1230px;"></span>
+  <span class="td-strip strip-pub" style="left:413px;"></span>
+  <span class="td-strip strip-ctx" style="left:1138px;"></span>
+  <span class="td-strip strip-src" style="left:1184px;"></span>
+  <span class="td-strip strip-vd" style="left:1230px;"></span>
 </section>
+</div>
 
-<!-- 9. VERDICT -->
-<section class="sec sec-verdict">
-  <div class="td-bar">Учёные доказали: [X]</div>
-  <div class="vd-strip"></div>
-  <div class="td-tabs">
-    <div class="td-tab" style="left:15px;"><span class="tab-sq"></span><span class="tab-label">ПУБЛИКАЦИЯ</span></div>
-    <div class="td-tab" style="left:61px;"><span class="tab-sq"></span><span class="tab-label">КОНТЕКСТ</span></div>
-    <div class="td-tab" style="left:106px;"><span class="tab-sq"></span><span class="tab-label">ПЕРВОИСТОЧНИК</span></div>
-    <div class="td-tab" style="left:153px;"><span class="tab-sq active"></span><span class="tab-label">ВЕРДИКТ</span></div>
-  </div>
-
-  <p class="vd-main">Выводы искажены и преувеличены</p>
-</section>
-
-<!-- 10. CHECKLIST -->
+<!-- 9. CHECKLIST -->
 <section class="sec sec-checklist">
   <hr class="divider" style="top:70px;">
   <div class="cl-ticker">
@@ -353,5 +498,10 @@
 
 </div>
 </div>
-<script src="js/scale.js"></script></body>
+<script src="js/scale.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/teardown.js"></script>
+<script src="js/sides.js"></script>
+<script src="js/scientists.js"></script></body>
 </html>

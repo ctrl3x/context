@@ -12,11 +12,14 @@ html, body { background: var(--white); }
 
 body {
   overflow-x: hidden;
+  transition: background-color 0.3s ease;
 }
+
+/* тёмный экран у центра вьюпорта: боковые поля за пределами колонки тоже чёрные */
+body.sides-dark { background: var(--black); }
 
 #page {
   width: 1280px;
-  overflow: hidden;
 }
 
 #page-inner {
@@ -94,7 +97,8 @@ body {
   background: var(--black);
   border-radius: 50%;
 }
-.dot-white   { background: var(--white); width: 20px; height: 20px; }
+.dot-white   { background: var(--white); width: 21.38px; height: 21.38px; }
+.circle-dot   { background: var(--white); width: 21.38px; height: 21.38px; transition: opacity 0.45s ease; opacity: 0; }
 .dot-orange  { background: var(--orange); width: 20px; height: 20px; }
 
 .ann {
@@ -178,13 +182,12 @@ body {
 
 .hero-sub {
   position: absolute;
-  left: 842px; top: 185px;
-  width: 336px;            /* правый край = 1176, как в макете */
+  left: 840px; top: 196px;
+  width: 340px;            /* правый край = 1180, как в макете */
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 18px; font-weight: 500;
-  text-transform: uppercase;
+  font-size: 16px; font-weight: 500;
   text-align: right;
-  line-height: 117%;
+  line-height: 130%;
   color: var(--red);
 }
 
@@ -226,8 +229,152 @@ body {
   font-size: 40px;
   width: 720px;
 }
+.sec-statement .statement-40 { width: auto; white-space: nowrap; }
 .sec-statement .dot-white { left: 470px; top: 407px; }
 
+/* скролл-скраб: экран пинится через view-timeline, элементы скрабятся по
+   сближение -> столкновение -> осколки по окружности -> текст по центру.
+   Без поддержки timeline прежние keyframe-анимации отключаются. */
+.statement-pin {
+  position: relative;
+  height: 2632px;
+  view-timeline-name: --statement;
+}
+.statement-pin .sec-statement {
+  position: relative;
+  top: 0;
+  z-index: 5;
+}
+.statement-pin.tl .sec-statement {
+  animation: stPin linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stPin {
+  from { transform: translateY(0); }
+  to   { transform: translateY(1800px); }
+}
+
+.statement-pin.no-tl .sec-statement .dot-white:not(.dot-piece) { transition: opacity 0.25s ease; opacity: 0; }
+.statement-pin.no-tl .sec-statement .statement-40 { transition: opacity 0.25s ease; opacity: 0; }
+.statement-pin.no-tl .sec-statement .dot-piece { transition: opacity 0.25s ease; opacity: 0; }
+.statement-pin.no-tl .sec-statement .statement-question { transition: opacity 0.25s ease; opacity: 0; }
+.statement-pin.no-tl .sec-statement .circle-dot { transition: opacity 0.25s ease; opacity: 0; }
+
+.statement-pin.tl .sec-statement .dot-white:not(.dot-piece) {
+  animation: stDot linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stDot {
+  0%    { transform: translateX(-370px); opacity: 1; }
+  30%   { transform: translateX(-140px); opacity: 1; }
+  33%   { transform: translateX(-140px); opacity: 0; }
+  100%  { transform: translateX(-140px); opacity: 0; }
+}
+
+.statement-pin.tl .sec-statement .statement-40 {
+  animation: stText linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stText {
+  0%   { transform: translateX(654px); }
+  30%  { transform: translateX(-212px); }
+  100% { transform: translateX(-1654px); }
+}
+
+.sec-statement .dot-piece {
+  left: 330px;
+  top: 407px;
+  opacity: 0;
+  pointer-events: none;
+}
+.statement-pin.tl .sec-statement .p1 {
+  animation: stP1 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stP1 {
+  0%, 30% { transform: translate(0,0); opacity: 0; }
+  33%     { transform: translate(0,0); opacity: 1; }
+  42%     { transform: translate(54.7px,-126.1px); opacity: 1; }
+  100%    { transform: translate(54.7px,-126.1px); opacity: 1; }
+}
+.statement-pin.tl .sec-statement .p2 {
+  animation: stP2 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stP2 {
+  0%, 30% { transform: translate(0,0); opacity: 0; }
+  33%     { transform: translate(0,0); opacity: 1; }
+  42%     { transform: translate(65.4px,162.6px); opacity: 1; }
+  100%    { transform: translate(65.4px,162.6px); opacity: 1; }
+}
+
+.statement-question {
+  position: absolute;
+  left: 314px;
+  top: 364px;
+  width: 651px;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px;
+  line-height: 130%;
+  opacity: 0;
+  pointer-events: none;
+}
+.statement-pin.tl .sec-statement .statement-question {
+  animation: stQuestion linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stQuestion {
+  0%, 92% { opacity: 0; }
+  96%, 100% { opacity: 1; }
+}
+
+/* попарное проявление оставшихся 10 кружков после остановки осколков */
+.statement-pin.tl .sec-statement .circle-dot {
+  opacity: 0;
+  animation-timeline: --statement;
+}
+.statement-pin.tl .sec-statement .pair1a,
+.statement-pin.tl .sec-statement .pair1b {
+  animation: stPair1 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+.statement-pin.tl .sec-statement .pair2a,
+.statement-pin.tl .sec-statement .pair2b {
+  animation: stPair2 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+.statement-pin.tl .sec-statement .pair3a,
+.statement-pin.tl .sec-statement .pair3b {
+  animation: stPair3 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+.statement-pin.tl .sec-statement .pair4a,
+.statement-pin.tl .sec-statement .pair4b {
+  animation: stPair4 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+.statement-pin.tl .sec-statement .pair5a,
+.statement-pin.tl .sec-statement .pair5b {
+  animation: stPair5 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 24% cover 76%;
+}
+@keyframes stPair1 { 0%,45% { opacity: 0; } 55%,100% { opacity: 1; } }
+@keyframes stPair2 { 0%,55% { opacity: 0; } 65%,100% { opacity: 1; } }
+@keyframes stPair3 { 0%,65% { opacity: 0; } 75%,100% { opacity: 1; } }
+@keyframes stPair4 { 0%,75% { opacity: 0; } 85%,100% { opacity: 1; } }
+@keyframes stPair5 { 0%,85% { opacity: 0; } 95%,100% { opacity: 1; } }
 .sec-statement2 .statement-40 {
   left: 193px; top: 364px;
   width: 894px;
@@ -247,19 +394,17 @@ body {
 
 .sec-benefits .h40 { position: absolute; left: 100px; top: 40px; }
 
-.orange-bg {
-  position: absolute;
-  background: var(--orange);
-}
+.benefit-cell { position: absolute; }
+.benefit-cell:hover { background: var(--orange); }
+.benefit-cell:hover + .benefit { color: var(--black); }
+.benefit-cell:hover + .benefit .benefit-num { color: var(--white); }
 
-.benefit { position: absolute; width: 340px; }
-.benefit.on-orange { color: var(--black); }
+.benefit { position: absolute; width: 340px; pointer-events: none; }
 .benefit-num {
   font-size: 64px;
   color: var(--orange);
   margin-bottom: 30px;
 }
-.benefit.on-orange .benefit-num { color: var(--white); }
 .benefit-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 23px; font-weight: 500;
@@ -269,7 +414,35 @@ body {
 .benefit-p { font-size: 18px; line-height: 125%; }
 
 /* =========================================================
-   6. CARD
+   6. CARDS: пин-контейнер + фиксированная фото-рука
+========================================================= */
+
+.cards-pin { position: relative; }
+
+/* рука с лупой стоит на месте, пока карточки уезжают лентой:
+   position:sticky не подходит (лента двигает transform),
+   поэтому слой живёт внутри пин-обёртки и не участвует в ленте */
+.cards-photo {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1280px; height: 832px;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cards-photo img {
+  position: absolute;
+  left: 433px; top: 291px;
+  width: 446px; height: 561px;
+  /* стекло лупы прозрачное: вырезаем круг (центр 134,132, r≈112) в слое руки */
+  -webkit-mask-image: radial-gradient(circle at 134px 132px, transparent 0 102px, #000 110px);
+  mask-image: radial-gradient(circle at 134px 132px, transparent 0 102px, #000 110px);
+}
+.cards-photo .card-circle {
+  left: 456px; top: 310px;
+}
+
+/* =========================================================
+   6a. CARD
 ========================================================= */
 
 .card-frame {
@@ -305,6 +478,11 @@ body {
   mix-blend-mode: overlay;
 }
 
+/* фото видно только пока карточки в зоне пина; скрытие быстрое,
+   чтобы рука не «плыла» на соседних экранах */
+.cards-photo { opacity: 0; transition: opacity 0.15s ease; z-index: 2; }
+.cards-pin.on-stage .cards-photo { opacity: 1; }
+
 .card-num {
   position: absolute;
   left: 334px; top: 291px;
@@ -336,7 +514,14 @@ body {
   left: 575px; top: 461px;
   width: 460px;
   font-size: 16px;
+  font-family: 'Arsenal', serif;
   color: var(--white);
+}
+
+/* лента карточек 01-04 (и вход/выход через стейтмент) */
+.sec.ribbon {
+  transition: transform 620ms cubic-bezier(.77,0,.18,1);
+  will-change: transform;
 }
 
 /* =========================================================
@@ -371,16 +556,21 @@ body {
   background: var(--black);
   border: 2px solid var(--black);
 }
+/* пятно фонарика: позиция курсора над тёмной панелью (js/scientists.js);
+   дефолт 226/177 — центр пятна из макета. Круг 140px = эллипс 280 из макета,
+   кромка добита блюром 61: ядро 100% до 66px, 30% на радиусе 140, ноль к 205px */
+@property --mx { syntax: '<length-percentage>'; inherits: false; initial-value: 226px; }
+@property --my { syntax: '<length-percentage>'; inherits: false; initial-value: 177px; }
 .sci-mask {
+  --mx: 226px; --my: 177px;
   position: absolute;
   left: 100px; top: 433px;
   width: 1080px; height: 350px;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 96px, #000 140px, #000 330px, transparent 365px), linear-gradient(to bottom, transparent 62px, #000 80px, #000 75%, rgba(0,0,0,0.35) 100%);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent 96px, #000 140px, #000 330px, transparent 365px), linear-gradient(to bottom, transparent 62px, #000 80px, #000 75%, rgba(0,0,0,0.35) 100%);
-  mask-composite: intersect;
+  -webkit-mask-image: radial-gradient(circle 205px at var(--mx) var(--my), rgba(0,0,0,1) 0 66px, rgba(0,0,0,0.3) 140px, rgba(0,0,0,0) 205px);
+  mask-image: radial-gradient(circle 205px at var(--mx) var(--my), rgba(0,0,0,1) 0 66px, rgba(0,0,0,0.3) 140px, rgba(0,0,0,0) 205px);
 }
+.sci-mask.returning { transition: --mx 0.6s ease, --my 0.6s ease; }
 .sci-questions {
   position: absolute;
   left: 96px; top: 55px;
@@ -495,39 +685,160 @@ body {
   border-right: none;
 }
 
+/* ---------- 8b/8c. КОНТЕКСТ и ПЕРВОИСТОЧНИК ---------- */
+
+.td2-h {
+  position: absolute;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 130%;
+  color: var(--black);
+}
+.td2-p {
+  position: absolute;
+  font-family: 'Arsenal', serif;
+  font-size: 16px;
+  line-height: 125%;
+  color: var(--black);
+}
+.td2-p b { font-weight: 700; }
+.td2-small { font-size: 14px; }
+.td2-img { position: absolute; object-fit: cover; }
+
+/* ---------- 8. пин табов с доводкой ----------
+   Экран пинится на 3200px скролла (3 перехода по 800 + 800 запаса на
+   вердикте), но скролл больше не скрабит анимацию: он только выбирает
+   состояние s0..s3 (пороги — середины переходов, их проставляет
+   js/teardown.js), а каждый переход всегда играет фиксированные 0.8 с —
+   скоростью скролла управлять нельзя.
+   Публикация → контекст: полоса «контекст» съезжает (1138 → 459),
+   → первоисточник: «первоисточник» (1184 → 504), → вердикт: все полосы
+   доезжают до левого края (0/45/90), «вердикт» — на 135, оранжевый слой
+   проявляется. Контент меняется перекрёстно: уход в первой половине
+   перехода, приход во второй. Границы диапазона пина проставляет
+   js/teardown.js; значения ниже — статичный запас на случай
+   отключённого JS. */
+
+.td-pin {
+  position: relative;
+  height: 4032px;              /* 832 экран + 3200px пина (3 × 800 перехода + 800 запас на вердикте) */
+}
+.td-pin .sec-teardown { position: relative; z-index: 5; }
+.td-pin.tl .sec-teardown {
+  animation: tdPin linear both;
+  animation-timeline: scroll(root);
+  animation-range: 51.3% 67.5%;
+}
+@keyframes tdPin {
+  /* translateY догоняет скролл весь диапазон — экран приколот и держится
+     на вердикте лишние 800px; дальше анимация замирает на 3200px и секция
+     уезжает вместе со страницей, стыкуясь с чек-листом */
+  from { transform: translateY(0); }
+  to   { transform: translateY(3200px); }
+}
+
+.td-view { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.td-left { z-index: 2; }
+.td-strip { z-index: 3; background: var(--white); }
+.td-tabs { z-index: 4; }  /* над полосами: кружки и подписи табов не затираются «ластиком» */
+.td-bar { z-index: 4; }
+
+/* ---- доводка переходов с фиксированной скоростью ----
+   Состояние выбирает скролл (s0/s1/s2), анимацию делает transition:
+   полосы и табы всегда едут 0.8 с, слои контента меняются перекрёстно
+   (уход — сразу, приход — с задержкой 0.4 с, во второй половине). */
+
+.td-strip, .td-tab { transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
+
+/* целевые положения полос и табов по состояниям */
+.td-pin.s1 .strip-ctx, .td-pin.s2 .strip-ctx { transform: translateX(-679px); }
+.td-pin.s1 .tab-ctx, .td-pin.s2 .tab-ctx { transform: translateX(-680px); }
+.td-pin.s2 .strip-src { transform: translateX(-680px); }
+.td-pin.s2 .tab-src { transform: translateX(-681px); }
+
+/* состояние s3 (вердикт): полосы доезжают до левого края,
+   подложка таба «вердикт» гаснет — таб остаётся на оранжевом */
+.td-pin.s3 .strip-pub, .td-pin.s3 .tab-pub { transform: translateX(-413px); }
+.td-pin.s3 .strip-ctx, .td-pin.s3 .tab-ctx { transform: translateX(-1093px); }
+.td-pin.s3 .strip-src, .td-pin.s3 .tab-src { transform: translateX(-1094px); }
+.td-pin.s3 .tab-vd { transform: translateX(-1095px); }
+.td-pin.s3 .strip-vd {
+  transform: translateX(-1095px);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.4s ease;
+}
+
+.td-ctx, .td-src, .td-vd { opacity: 0; transform: translateX(60px); }
+.td-view {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition-delay: 0s;               /* уход — сразу */
+}
+.td-pub { transition-delay: 0.4s; }   /* возврат публикации — во второй половине */
+
+/* левая панель с постом: уезжает влево вместе с полосами на вердикте */
+.td-left { transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
+
+/* состояние s1: контекст */
+.td-pin.s1 .td-pub {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition-delay: 0s;
+}
+.td-pin.s1 .td-ctx {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.4s;
+}
+
+/* состояние s2: первоисточник */
+.td-pin.s2 .td-pub {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition-delay: 0s;
+}
+.td-pin.s2 .td-ctx {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition-delay: 0s;
+}
+.td-pin.s2 .td-src {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.4s;
+}
+
+/* состояние s3: вердикт */
+.td-pin.s3 .td-left { transform: translateX(-413px); }
+.td-pin.s3 .td-pub {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition-delay: 0s;
+}
+.td-pin.s3 .td-ctx, .td-pin.s3 .td-src {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition-delay: 0s;
+}
+.td-pin.s3 .td-vd {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.4s;
+}
+
+/* активная точка таба — дискретно, по ближайшему состоянию;
+   на вердикте таб стоит на оранжевом — белый квадрат и белая подпись */
+.td-pin.s0 .tab-pub .tab-sq,
+.td-pin.s1 .tab-ctx .tab-sq,
+.td-pin.s2 .tab-src .tab-sq { background: var(--orange); }
+.td-pin.s3 .tab-vd .tab-sq { background: var(--white); border-color: transparent; }
+.td-pin.s3 .tab-vd .tab-label { color: var(--white); }
+
 /* =========================================================
-   9. VERDICT
+   9. VERDICT — слой пина (s3)
 ========================================================= */
 
-.sec-verdict { background: var(--orange); }
-
-.vd-dot {
-  position: absolute;
-  left: 196px; top: 101px;
-  width: 26px; height: 26px;
-  background: var(--white);
-  border-radius: 50%;
-}
-.vd-label {
-  position: absolute;
-  left: 222px; top: 100px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 40px;
-  line-height: 130%;
-  color: var(--white);
-}
-
-.sec-verdict .td-tab { top: 249px; }
-.vd-strip { position: absolute; left: 0; top: 70px; width: 135px; height: 762px; background: var(--white); }
-.vd-strip::after { content: ""; position: absolute; right: -1px; top: 0; width: 0; height: 100%; border-right: 1px solid var(--black); }
-.vd-strip::before { content: ""; position: absolute; top: 0; bottom: 0; width: 1px; background: var(--black); }
-.vd-strip::before { left: 45px; box-shadow: 45px 0 0 var(--black), 90px 0 0 var(--black); }
-.sec-verdict .tab-sq { border-color: var(--orange); background: var(--white); }
-.sec-verdict .tab-sq.active { background: var(--white); border-color: transparent; }
-.sec-verdict .tab-label { color: var(--black); }
-.sec-verdict .td-tab:last-child .tab-sq { background: var(--white); border: none; }
-.sec-verdict .td-tab:last-child .tab-label { color: var(--white); }
-.sec-verdict .tab-label { color: var(--black); }
+.td-vd { background: var(--orange); }
 
 .vd-main {
   position: absolute;
@@ -719,3 +1030,83 @@ body {
   line-height: 125%;
   color: var(--orange);
 }
+
+/* ---------- hero intro story ---------- */
+
+.hero-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.sec-hero.s1 .hero-glass { opacity: 1; }
+
+.hero-content {
+  position: absolute;
+  inset: 0;
+  padding: 50px 100px 0;
+  filter: blur(0);
+  transition: filter 0.6s ease;
+}
+.sec-hero.s1 .hero-content { filter: blur(4px); }
+
+.hero-widget {
+  position: absolute;
+  width: 340px;
+  padding: 15px 16px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+}
+.hero-widget .w-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.hero-widget .w-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 120%;
+  letter-spacing: 0.15em;
+}
+.hero-widget .w-title.wide { letter-spacing: 0.17em; }
+.hero-widget .w-close {
+  flex: 0 0 auto;
+  margin: 1px -4px -4px;
+  padding: 4px;
+  box-sizing: content-box;
+  cursor: pointer;
+}
+.hero-widget .w-text {
+  margin-top: 16px;
+  font-family: 'Arsenal', serif;
+  font-size: 20px;
+  line-height: 110%;
+}
+.w1 { z-index: 11; }
+.w2 { z-index: 12; }
+.w3 { z-index: 13; }
+.w4 { z-index: 14; }
+.sec-hero.s1 .w1, .sec-hero.s2 .w2, .sec-hero.s3 .w3, .sec-hero.s4 .w4 {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.sec-hero .hero-widget.off {
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+}
+.sec-hero.clear .hero-content { filter: blur(0); }
+.sec-hero.clear .hero-glass { opacity: 0; }
+.w-orange { background: var(--orange); border: 1px solid var(--orange); color: var(--white); }
+.w-white  { background: var(--white);  border: 1px solid var(--black);  color: var(--black); }
+.w-gray   { background: var(--gray);   border: 1px solid var(--gray);   color: var(--white); }
+.w-black  { background: var(--black);  border: 1px solid var(--black);  color: var(--white); }
+
+.sec-hero.no-anim, .sec-hero.no-anim * { transition: none !important; }
