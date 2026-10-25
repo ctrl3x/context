@@ -62,9 +62,18 @@
   applyProgress();
 
   // превью состояний без прокрутки: #td-step0 (публикация), 1 (контекст), 2 (первоисточник), 3 (вердикт)
-  const m = location.hash.match(/^#td-step([0-3])$/);
-  if (m) {
-    window.scrollTo(0, pinTop() + TRANS * scale() * (+m[1]));
-    applyProgress();
+  // повтор по load: до загрузки картинок выше layout меньше, первый прыжок уходит не туда
+  function hashJump() {
+    const m = location.hash.match(/^#td-step([0-3])$/);
+    if (m) {
+      window.scrollTo(0, pinTop() + TRANS * scale() * (+m[1]));
+      applyProgress();
+    }
+  }
+  hashJump();
+  // шрифты (display=swap) доезжают после load и растят документ: прыжок по
+  // хэшу уходит не туда — повторяем после готовности шрифтов
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { hashJump(); applyProgress(); });
   }
 })();

@@ -1,11 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "figma": {
-      "type": "local",
-      "command": ["npx", "-y", "cursor-talk-to-figma-mcp@latest"],
-      "enabled": true,
-      "environment": {}
-    }
-  }
+  "mcp": {}
 }

@@ -232,12 +232,20 @@ body.sides-dark { background: var(--black); }
 .sec-statement .statement-40 { width: auto; white-space: nowrap; }
 .sec-statement .dot-white { left: 470px; top: 407px; }
 
-/* скролл-скраб: экран пинится через view-timeline, элементы скрабятся по
-   сближение -> столкновение -> осколки по окружности -> текст по центру.
+/* скролл-скраб: элементы скрабятся по
+   сближение -> столкновение -> осколки по окружности -> текст по центру ->
+   текст улетает влево и растворяется на кромке окружности, растут 12 спиц
+   (финальный кадр макета).
+   PIN 2700: последние 900px отданы финальной фазе; старые фазы сохраняют
+   абсолютную длину в px скролла, поэтому их проценты пересчитаны (px/2700).
+   Диапазон анимации ниже задан в процентах как запасной вариант: hero.js
+   пересчитывает его в точные px на scroll(root)-таймлайне (Chromium меряет
+   view-timeline по layout-боксу без учёта scale — из-за этого процентные
+   границы плывут на вьюпортах с высотой != 832·scale).
    Без поддержки timeline прежние keyframe-анимации отключаются. */
 .statement-pin {
   position: relative;
-  height: 2632px;
+  height: 3532px; /* 2700 (PIN) + 832 (экран) */
   view-timeline-name: --statement;
 }
 .statement-pin .sec-statement {
@@ -248,11 +256,11 @@ body.sides-dark { background: var(--black); }
 .statement-pin.tl .sec-statement {
   animation: stPin linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 @keyframes stPin {
   from { transform: translateY(0); }
-  to   { transform: translateY(1800px); }
+  to   { transform: translateY(2700px); }
 }
 
 .statement-pin.no-tl .sec-statement .dot-white:not(.dot-piece) { transition: opacity 0.25s ease; opacity: 0; }
@@ -264,28 +272,40 @@ body.sides-dark { background: var(--black); }
 .statement-pin.tl .sec-statement .dot-white:not(.dot-piece) {
   animation: stDot linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
+/* шарик раздваивается в момент ПЕРВОГО касания буквы: правый край шарика
+   (центр 480.69 + tx + 10.69) доходит до левого края текста (526 + tx текста)
+   при k≈0.966 прежнего подлёта → 521.6px скролла (19.32% от 2700).
+   Шарик замирает в точке контакта (tx −147.84) и там гаснет; длины прочих
+   фаз в px сохранены: окно расщепления 521.6–575.6, прилёт осколков 756px */
 @keyframes stDot {
-  0%    { transform: translateX(-370px); opacity: 1; }
-  30%   { transform: translateX(-140px); opacity: 1; }
-  33%   { transform: translateX(-140px); opacity: 0; }
-  100%  { transform: translateX(-140px); opacity: 0; }
+  0%     { transform: translateX(-370px); opacity: 1; }
+  19.32% { transform: translateX(-147.84px); opacity: 1; }
+  21.31%, 100% { transform: translateX(-147.84px); opacity: 0; }
 }
 
 .statement-pin.tl .sec-statement .statement-40 {
   animation: stText linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 @keyframes stText {
-  0%   { transform: translateX(654px); }
-  30%  { transform: translateX(-212px); }
-  100% { transform: translateX(-1654px); }
+  0%     { transform: translateX(654px); opacity: 1; }
+  19.32% { transform: translateX(-182.47px); opacity: 1; } /* первое касание буквы */
+  21.31% { transform: translateX(-182.47px); opacity: 1; } /* держится, пока шарик гаснет */
+  /* правый край текста (526 + tx + 1128) дошёл до левой кромки окружности
+     (640 - 299.31 ≈ 340.7) → tx = -1313.31 на p=56.17%; дальше текст
+     доехал бы до края экрана, но растворяется прямо у окружности */
+  56.17% { transform: translateX(-1313.31px); opacity: 1; }
+  58.39% { transform: translateX(-1385px); opacity: 0; } /* 60px растворения в движении */
+  66.67%, 100% { transform: translateX(-1654px); opacity: 0; }
 }
 
+/* осколки стартуют там, где шарик замер при контакте с буквой:
+   центр шарика в контакте (332.85, 417.69) → left 322.16, top 407 */
 .sec-statement .dot-piece {
-  left: 330px;
+  left: 322.16px;
   top: 407px;
   opacity: 0;
   pointer-events: none;
@@ -293,24 +313,30 @@ body.sides-dark { background: var(--black); }
 .statement-pin.tl .sec-statement .p1 {
   animation: stP1 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
+/* фазы осколков в % от PIN=2700: проявление 521.6–575.6px (19.32–21.31%),
+   прилёт на окружность 756px (28%).
+   Конечная точка осколка — позиция на окружности (210°), центр (380.79,266.35):
+   от старта (322.16,407) это translate(47.94,-151.34) */
 @keyframes stP1 {
-  0%, 30% { transform: translate(0,0); opacity: 0; }
-  33%     { transform: translate(0,0); opacity: 1; }
-  42%     { transform: translate(54.7px,-126.1px); opacity: 1; }
-  100%    { transform: translate(54.7px,-126.1px); opacity: 1; }
+  0%, 19.32% { transform: translate(0,0); opacity: 0; }
+  21.31%     { transform: translate(0,0); opacity: 1; }
+  28%        { transform: translate(47.94px,-151.34px); opacity: 1; }
+  100%       { transform: translate(47.94px,-151.34px); opacity: 1; }
 }
 .statement-pin.tl .sec-statement .p2 {
   animation: stP2 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
+/* зеркальный осколок — позиция 150°, центр (380.79,565.65):
+   от старта (322.16,407) это translate(47.94,147.97) */
 @keyframes stP2 {
-  0%, 30% { transform: translate(0,0); opacity: 0; }
-  33%     { transform: translate(0,0); opacity: 1; }
-  42%     { transform: translate(65.4px,162.6px); opacity: 1; }
-  100%    { transform: translate(65.4px,162.6px); opacity: 1; }
+  0%, 19.32% { transform: translate(0,0); opacity: 0; }
+  21.31%     { transform: translate(0,0); opacity: 1; }
+  28%        { transform: translate(47.94px,147.97px); opacity: 1; }
+  100%       { transform: translate(47.94px,147.97px); opacity: 1; }
 }
 
 .statement-question {
@@ -328,14 +354,50 @@ body.sides-dark { background: var(--black); }
 .statement-pin.tl .sec-statement .statement-question {
   animation: stQuestion linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 @keyframes stQuestion {
-  0%, 92% { opacity: 0; }
-  96%, 100% { opacity: 1; }
+  /* вопрос появляется (1656–1728px), держится и исчезает в финале пина —
+     остаётся только кольцо точек со спицами (кадр 65 макета) */
+  0%, 61.33% { opacity: 0; }
+  64%, 70%   { opacity: 1; }
+  76%, 100%  { opacity: 0; }
 }
 
-/* попарное проявление оставшихся 10 кружков после остановки осколков */
+/* финальный кадр: 12 радиальных спиц вытягиваются от кружков к центру
+   (dashoffset 275 → 0 по 1944–2322px), пока вопрос исчезает.
+   В no-tl ветке dashoffset рулит hero.js */
+.st-spokes {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1280px;
+  height: 832px;
+  pointer-events: none;
+}
+.st-spokes line {
+  stroke: var(--white);
+  stroke-width: 1;
+  stroke-dasharray: 275;
+  stroke-dashoffset: 275;
+}
+.statement-pin.tl .st-spokes line {
+  animation: stSpoke linear both;
+  animation-timeline: --statement;
+  animation-range: cover 19.065% cover 80.935%;
+}
+@keyframes stSpoke {
+  0%, 72%   { stroke-dashoffset: 275; }
+  86%, 100% { stroke-dashoffset: 0; }
+}
+
+/* попарное проявление оставшихся 10 кружков после остановки осколков.
+   Порядок пар — слева направо, по x левого кружка пары:
+   pair1(479.65) → pair3(479.65) → pair2(629.31) → pair4(778.97),
+   пара на экваторе (pair5, x=330/929, y≈405) — последней.
+   У pair1a и pair3b левый кружок на одной вертикали (x=479.65) —
+   их очерёдность сохранена прежней.
+   Окна пар по 180px скролла (как раньше): 810–1710px → 30–63.33% от 2700. */
 .statement-pin.tl .sec-statement .circle-dot {
   opacity: 0;
   animation-timeline: --statement;
@@ -344,37 +406,37 @@ body.sides-dark { background: var(--black); }
 .statement-pin.tl .sec-statement .pair1b {
   animation: stPair1 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
-}
-.statement-pin.tl .sec-statement .pair2a,
-.statement-pin.tl .sec-statement .pair2b {
-  animation: stPair2 linear both;
-  animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 .statement-pin.tl .sec-statement .pair3a,
 .statement-pin.tl .sec-statement .pair3b {
+  animation: stPair2 linear both;
+  animation-timeline: --statement;
+  animation-range: cover 19.065% cover 80.935%;
+}
+.statement-pin.tl .sec-statement .pair2a,
+.statement-pin.tl .sec-statement .pair2b {
   animation: stPair3 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 .statement-pin.tl .sec-statement .pair4a,
 .statement-pin.tl .sec-statement .pair4b {
   animation: stPair4 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
 .statement-pin.tl .sec-statement .pair5a,
 .statement-pin.tl .sec-statement .pair5b {
   animation: stPair5 linear both;
   animation-timeline: --statement;
-  animation-range: cover 24% cover 76%;
+  animation-range: cover 19.065% cover 80.935%;
 }
-@keyframes stPair1 { 0%,45% { opacity: 0; } 55%,100% { opacity: 1; } }
-@keyframes stPair2 { 0%,55% { opacity: 0; } 65%,100% { opacity: 1; } }
-@keyframes stPair3 { 0%,65% { opacity: 0; } 75%,100% { opacity: 1; } }
-@keyframes stPair4 { 0%,75% { opacity: 0; } 85%,100% { opacity: 1; } }
-@keyframes stPair5 { 0%,85% { opacity: 0; } 95%,100% { opacity: 1; } }
+@keyframes stPair1 { 0%,30%    { opacity: 0; } 36.67%,100% { opacity: 1; } }
+@keyframes stPair2 { 0%,36.67% { opacity: 0; } 43.33%,100% { opacity: 1; } }
+@keyframes stPair3 { 0%,43.33% { opacity: 0; } 50%,100%    { opacity: 1; } }
+@keyframes stPair4 { 0%,50%    { opacity: 0; } 56.67%,100% { opacity: 1; } }
+@keyframes stPair5 { 0%,56.67% { opacity: 0; } 63.33%,100% { opacity: 1; } }
 .sec-statement2 .statement-40 {
   left: 193px; top: 364px;
   width: 894px;
@@ -400,16 +462,22 @@ body.sides-dark { background: var(--black); }
 .benefit-cell:hover + .benefit .benefit-num { color: var(--white); }
 
 .benefit { position: absolute; width: 340px; pointer-events: none; }
+/* метрики из макета (1779-817): номер top+93 → заголовок top+60 → текст.
+   У заголовка letter-spacing −1% как в макете — иначе «СОХРАНЯТЬ ДОВЕРИЕ
+   К НАУКЕ» (25 знаков ≈ 345px) переносится и текст 06 вылезает за экран */
 .benefit-num {
   font-size: 64px;
+  line-height: 130%;
   color: var(--orange);
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 .benefit-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 23px; font-weight: 500;
+  line-height: 130%;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
-  margin: 18px 0 20px;
+  margin: 0 0 30px;
 }
 .benefit-p { font-size: 18px; line-height: 125%; }
 
@@ -528,6 +596,51 @@ body.sides-dark { background: var(--black); }
    7. SCIENTISTS
 ========================================================= */
 
+/* ---- переход 04 → «Учёные доказали» ----
+   Дискретный fade (как ленты карточек): один жест = одно переключение,
+   скролл прогрессом не рулит. Запускает cards.js классами на .sec-scientists:
+   .sci-fade-in — жест вниз с карточки 04: экран проявляется поверх неё
+   (сама карточка стоит в потоке, скролл не трогается), в конце мгновенный
+   скролл на верх .sci-pin и сброс класса — экран уже лежит в потоке сам;
+   .sci-fade-out — жест вверх с «Учёные доказали»: сначала мгновенный скролл
+   на карточку 04 (экран ещё накрыт классом), затем экран растворяется,
+   открывая карточку. Смещение -832px — layout-px: экран на экран выше
+   (компенсирует собственное положение в потоке под карточкой 04).
+   Длительность и кривая — как у .ribbon (620ms). */
+.sci-pin {
+  position: relative;
+  /* 832 экран + 832 растяжения маски до фулскрина + 832 стоянки на нём.
+     Хвост пина — отдельный экран из макета (1836:934): при скролле маска-
+     панель растягивается на весь экран (скраб --p в js/scientists.js),
+     секцию на это время прикалывает вручную transform (см. scrub там же):
+     position:sticky тут нельзя — body с overflow-x:hidden остаётся
+     scroll-контейнером (overflow-y считается auto) и sticky
+     прицепляется к нему, а не к окну */
+  height: 2496px;
+}
+/* поверх руки-лупы (z-index 2) и карточки 04: экран закрывает их целиком */
+.sci-pin .sec-scientists { position: relative; z-index: 5; }
+/* подложка хвоста пина: в режиме вписывания (вьюпорт выше 832·scale) под
+   приколотой секцией видна обёртка. Красим её в чёрный только когда маска
+   накрыла больше половины экрана (класс ставит js/scientists.js) — иначе
+   она вспыхнула бы под fade-переходом с карточки 04 */
+.sci-pin.sciexp-dark { background: var(--black); }
+
+.sci-fade-in {
+  animation: sciFadeIn 620ms cubic-bezier(.77,0,.18,1) both;
+}
+.sci-fade-out {
+  animation: sciFadeOut 620ms cubic-bezier(.77,0,.18,1) both;
+}
+@keyframes sciFadeIn {
+  from { transform: translateY(-832px); opacity: 0; visibility: hidden; }
+  to   { transform: translateY(-832px); opacity: 1; }
+}
+@keyframes sciFadeOut {
+  from { transform: translateY(-832px); opacity: 1; }
+  to   { transform: translateY(-832px); opacity: 0; }
+}
+
 .sci-title {
   position: absolute;
   left: 100px; top: 54px;
@@ -551,32 +664,70 @@ body.sides-dark { background: var(--black); }
 
 .sci-panel {
   position: absolute;
-  left: 100px; top: 433px;
-  width: 1080px; height: 350px;
+  /* чёрная поверхность панели; при растяжении (--p ставится на .sci-pin,
+     js/scientists.js) растёт СИНХРОННО с маской — на фулскрин-экране
+     (1836:934) она и есть его чёрный фон. Без синхронного роста текст
+     маски остался бы белым на белом вне панели */
+  left: calc(100px - 100px * var(--p, 0));
+  top: calc(433px - 433px * var(--p, 0));
+  width: calc(1080px + 200px * var(--p, 0));
+  height: calc(350px + 482px * var(--p, 0));
   background: var(--black);
   border: 2px solid var(--black);
+  /* над декоративными svg секции (z 0), но под маской: маска позже в DOM */
+  z-index: 1;
 }
+/* типовые кружки макета (1779:721, Rectangle 34–37): круги 20×20 центром
+   в углах панели. Дети панели — при развёртке едут вместе с её углами
+   и гаснут от --p: на фулскрин-экране (1836:934) кружков в макете нет */
+.sci-dot {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--black);
+  opacity: calc(1 - var(--p, 0));
+}
+/* -12, а не -10: абсолютный ребёнок позиционируется от padding-box,
+   у панели граница 2px (глобальный border-box) — компенсируем её,
+   чтобы кружок стоял центром ровно на углу панели */
+.sci-dot.tl { left: -12px; top: -12px; }
+.sci-dot.tr { right: -12px; top: -12px; }
+.sci-dot.bl { left: -12px; bottom: -12px; }
+.sci-dot.br { right: -12px; bottom: -12px; }
 /* пятно фонарика: позиция курсора над тёмной панелью (js/scientists.js);
-   дефолт 226/177 — центр пятна из макета. Круг 140px = эллипс 280 из макета,
-   кромка добита блюром 61: ядро 100% до 66px, 30% на радиусе 140, ноль к 205px */
+   дефолт 226/177 — центр пятна из макета (при p=0), дальше его доезжает
+   скраб вместе с растяжкой. Круг 140px = эллипс 280 из макета, кромка
+   добита блюром 61: ядро 100% до 66px, 30% на радиусе 140, ноль к 205px.
+   --p (0..1) — прогресс растяжения маски из панели (100/433, 1080×350)
+   в фулскрин-экран (0/0, 1280×832, макет 1836:934): вся геометрия маски
+   и текста внутри — линейная интерполяция от p, ставит его скроллом
+   js/scientists.js. Fallback 0 в var() — на случай выключенного JS
+   и браузеров без @property (тогда --p просто токен) */
 @property --mx { syntax: '<length-percentage>'; inherits: false; initial-value: 226px; }
 @property --my { syntax: '<length-percentage>'; inherits: false; initial-value: 177px; }
+@property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
 .sci-mask {
   --mx: 226px; --my: 177px;
   position: absolute;
-  left: 100px; top: 433px;
-  width: 1080px; height: 350px;
+  left: calc(100px - 100px * var(--p, 0));
+  top: calc(433px - 433px * var(--p, 0));
+  width: calc(1080px + 200px * var(--p, 0));
+  height: calc(350px + 482px * var(--p, 0));
   overflow: hidden;
+  z-index: 1; /* над панелью (тоже z 1, но маска позже в DOM) */
   -webkit-mask-image: radial-gradient(circle 205px at var(--mx) var(--my), rgba(0,0,0,1) 0 66px, rgba(0,0,0,0.3) 140px, rgba(0,0,0,0) 205px);
   mask-image: radial-gradient(circle 205px at var(--mx) var(--my), rgba(0,0,0,1) 0 66px, rgba(0,0,0,0.3) 140px, rgba(0,0,0,0) 205px);
 }
 .sci-mask.returning { transition: --mx 0.6s ease, --my 0.6s ease; }
 .sci-questions {
   position: absolute;
-  left: 96px; top: 55px;
+  /* позиция текста относительно маски: панель (96;55, интерлиньяж 59) →
+     фулскрин (193;233.76, интерлиньяж 90 = 200% из макета 1836:934) */
+  left: calc(96px + 97px * var(--p, 0));
+  top: calc(55px + 178.76px * var(--p, 0));
   font-family: 'IBM Plex Mono', monospace;
   font-size: 45px;
-  line-height: 59px;
+  line-height: calc(59px + 31px * var(--p, 0));
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--white);
@@ -867,11 +1018,65 @@ body.sides-dark { background: var(--black); }
   line-height: 130%;
   white-space: nowrap;
 }
+/* тикер-строка чек-листа: правая скобка в сомкнутом состоянии наезжает на
+   зафиксированную левую; по классу .in (вешает js/checklist.js при входе
+   в кадр) скобка отъезжает вправо и «печатает» буквы «КОНТЕКСТ» одну за
+   другой. Буквы всегда занимают место в потоке (анимируется только opacity),
+   чтобы перенос строки не прыгал при переходе */
+.ctx-inline {
+  display: inline-flex;
+  align-items: baseline;
+}
 .ctx-inline .br {
   font-family: 'Roboto Mono', monospace;
   font-size: 40px;
   color: var(--orange);
+  /* ход скобки строго линейный: 8 букв за 0.8 с = ровно 0.1 с на букву.
+     Плавный ease здесь ломал синхрон: середина слова проезжалась бы
+     мгновенно (буквы вспыхивали бы пачкой), а края — с заметным
+     опозданием, и задержки букв не совпадали с краем скобки */
+  transition: transform 0.8s linear;
 }
+/* левая скобка зафиксирована: всегда на финальном месте */
+.ctx-inline .br-l { transform: translateX(0); }
+/* правая скобка в сомкнутом состоянии наезжает на левую (сдвиг влево на
+   всю ширину слова — задаёт js/checklist.js по реально измеренной ширине,
+   --ctx-shift); fallback на случай, если скрипт не успел измерить шрифт */
+.ctx-inline .br-r { transform: translateX(calc(var(--ctx-shift, 210px) * -1)); }
+/* в раскрытом состоянии правая скобка возвращается на своё место */
+.cl-ticker.in .br-r { transform: translateX(0); }
+.ctx-word {
+  display: inline-block;
+}
+/* буквы проявляются по одной. Скобка проезжает слово за 0.8 с линейно —
+   каждая буква ровно 0.1 с. Раскрытие: k-я буква начинает проявляться,
+   когда скобка доезжает до её левого края (0.1s·(k−1)), и становится
+   видимой ровно в момент, когда скобка её проехала */
+.ctx-word .ch {
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+/* сжатие (базовое состояние): скобка едет справа налево и «съедает» буквы —
+   k-я буква прячется, когда скобка наезжает на её правый край (0.8s − 0.1s·k),
+   и гаснет ровно к моменту, когда скобка её проехала */
+.ctx-word .ch:nth-child(1) { transition-delay: 0.7s; }
+.ctx-word .ch:nth-child(2) { transition-delay: 0.6s; }
+.ctx-word .ch:nth-child(3) { transition-delay: 0.5s; }
+.ctx-word .ch:nth-child(4) { transition-delay: 0.4s; }
+.ctx-word .ch:nth-child(5) { transition-delay: 0.3s; }
+.ctx-word .ch:nth-child(6) { transition-delay: 0.2s; }
+.ctx-word .ch:nth-child(7) { transition-delay: 0.1s; }
+.ctx-word .ch:nth-child(8) { transition-delay: 0s; }
+.cl-ticker.in .ctx-word .ch { opacity: 1; }
+/* при раскрытии — слева направо, синхронно со скобкой */
+.cl-ticker.in .ctx-word .ch:nth-child(1) { transition-delay: 0s; }
+.cl-ticker.in .ctx-word .ch:nth-child(2) { transition-delay: 0.1s; }
+.cl-ticker.in .ctx-word .ch:nth-child(3) { transition-delay: 0.2s; }
+.cl-ticker.in .ctx-word .ch:nth-child(4) { transition-delay: 0.3s; }
+.cl-ticker.in .ctx-word .ch:nth-child(5) { transition-delay: 0.4s; }
+.cl-ticker.in .ctx-word .ch:nth-child(6) { transition-delay: 0.5s; }
+.cl-ticker.in .ctx-word .ch:nth-child(7) { transition-delay: 0.6s; }
+.cl-ticker.in .ctx-word .ch:nth-child(8) { transition-delay: 0.7s; }
 
 .cl-title {
   position: absolute;
@@ -929,6 +1134,30 @@ body.sides-dark { background: var(--black); }
   background: var(--black);
 }
 
+/* катыш чек-листа: шарик катится по основной линии-зигзагу коннекторов.
+   Путь и границу проявления svg считает js/checklist.js по скроллу,
+   clip-path на img тоже инлайновый — без js svg полностью виден */
+.cl-ball {
+  position: absolute;
+  left: 0; top: 0;
+  /* размер узловых кружков checklist.svg (r=10): шарик — та же «бусина»,
+     что и точки на линии, поэтому в узлах совпадает с ними один в один */
+  width: 20px; height: 20px;
+  /* transform из js кладёт в точку пути левый верхний угол бокса, поэтому
+     сдвигаем на половину размера: в точке пути оказывается центр шарика */
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  /* чёрный — как узловые точки-кружки на линии: шарик читается «бусиной»,
+     едущей по тому же рисунку, а не цветным акцентом поверх него */
+  background: var(--black);
+  /* один уровень с коннекторами (lines-svg, z-index: 0), но позже в DOM —
+     шарик поверх чернил линии. Виджеты (z-index: 1) его перекрывают: на
+     старте он спрятан под оранжевым «Краткий чек-лист…», а в пути ныряет
+     под белый — ровно там, где сама линия уже уходит за виджеты */
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* =========================================================
    11. DECOR (наука стала декорацией)
 ========================================================= */
@@ -936,6 +1165,11 @@ body.sides-dark { background: var(--black); }
 .sec-decor .h40 { position: absolute; left: 100px; top: 80px; }
 .sec-decor .lead20 { position: absolute; left: 100px; top: 154px; width: 500px; }
 .sec-decor .hero-tags { margin-top: 0; }
+
+/* катыш тёмного экрана: белый — как линия decor_dark.svg и её узловые
+   кружки, шарик читается той же «бусиной» (в чек-листе он чёрный по тому
+   же принципу). Путь считает js/decor.js */
+.sec-decor .cl-ball { background: var(--white); }
 
 /* =========================================================
    12. FINALE

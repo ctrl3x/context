@@ -21,9 +21,16 @@
   const supportsTimeline = !!(window.CSS && CSS.supports &&
     CSS.supports('animation-timeline', '--statement'));
 
-  const PIN = 1800;
-  const P1 = 0.3;
-  const P2 = 0.45;
+  // PIN удлинён (1800 → 2700): в конце пина добавлена финальная фаза —
+  // буквы исчезают, из центра растут 12 спиц (кадр 65 макета)
+  const PIN = 2700;
+  // шарик раздваивается при первом касании буквы (контакт краёв на 521.6px
+  // скролла → 19.32%), окно расщепления — те же 54px, что и раньше
+  const P1 = 0.1932; // контакт: шарик замирает и гаснет
+  const P2 = 0.2131; // осколки отделились, летят к окружности
+  // позиция шарика в контакте (tx) и текста в тот же момент
+  const DOT_TX = -147.84;
+  const TEXT_TX = -182.47;
 
   if (supportsTimeline) {
     pinEl.classList.add('tl');
@@ -34,6 +41,29 @@
     dotMain.style.opacity = '';
     p1.style.opacity = '';
     p2.style.opacity = '';
+
+    // Точная привязка зоны скраба к реальному скроллу. Chromium считает
+    // границы view-timeline по layout-боксу элемента (не учитывая transform
+    // scale страницы), а скроллпорт — в сырых px: на вьюпортах с высотой
+    // != 832·scale проценты из CSS плывут, и тёмный экран встаёт со сдвигом
+    // (белая щель сверху). scroll(root)-таймлайн от боксов элемента не
+    // зависит, поэтому диапазон задаём в px от измеренного положения пина
+    // и пересчитываем при ресайзе. CSS-проценты остаются запасным вариантом.
+    const syncRange = function () {
+      const s = scale();
+      const top = stTopS();
+      const rng = top.toFixed(2) + 'px ' + (top + PIN * s).toFixed(2) + 'px';
+      pinEl.querySelectorAll('.sec-statement, .sec-statement *').forEach(function (el) {
+        el.style.animationTimeline = 'scroll(root)';
+        el.style.animationRange = rng;
+      });
+    };
+    syncRange();
+    var rangeRaf = 0;
+    window.addEventListener('resize', function () {
+      if (rangeRaf) return;
+      rangeRaf = requestAnimationFrame(function () { rangeRaf = 0; syncRange(); });
+    });
 
     // показать финальное кольцо, когда скролл дошёл до конца зоны пина
     const buildFn = function () { pinEl.classList.add('formed'); };
@@ -49,50 +79,72 @@
     setTimeout(function () { pinEl.classList.add('formed'); }, 700);
   }
 
-  // fallback-скраб (браузеры без scroll-driven animations): пары кружков и
-  // финальный вопрос появляются по тем же порогам, что и в CSS-таймлайне
+  // fallback-скраб (браузеры без scroll-driven animations): пары кружков,
+  // вопрос и финальные спицы рулятся по тем же порогам, что и CSS-таймлайн.
+  // Порядок пар — слева направо, по x левого кружка (как в CSS): 1→3→2→4,
+  // пара на экваторе (pair5) — последней. Окна пар 0.3–0.6333
+  // (по 180px скролла при PIN=2700, как и раньше)
   var pairSteps = supportsTimeline ? null : [
-    { els: statement.querySelectorAll('.pair1a, .pair1b'), a: 0.45, b: 0.55 },
-    { els: statement.querySelectorAll('.pair2a, .pair2b'), a: 0.55, b: 0.65 },
-    { els: statement.querySelectorAll('.pair3a, .pair3b'), a: 0.65, b: 0.75 },
-    { els: statement.querySelectorAll('.pair4a, .pair4b'), a: 0.75, b: 0.85 },
-    { els: statement.querySelectorAll('.pair5a, .pair5b'), a: 0.85, b: 0.95 }
+    { els: statement.querySelectorAll('.pair1a, .pair1b'), a: 0.3,    b: 0.3667 },
+    { els: statement.querySelectorAll('.pair3a, .pair3b'), a: 0.3667, b: 0.4333 },
+    { els: statement.querySelectorAll('.pair2a, .pair2b'), a: 0.4333, b: 0.5 },
+    { els: statement.querySelectorAll('.pair4a, .pair4b'), a: 0.5,    b: 0.5667 },
+    { els: statement.querySelectorAll('.pair5a, .pair5b'), a: 0.5667, b: 0.6333 }
   ];
   var questionEl = supportsTimeline ? null : statement.querySelector('.statement-question');
+  // спицы рисуются в fallback через JS (в tl-ветке их ведёт CSS-анимация)
+  var spokes = supportsTimeline ? null : statement.querySelectorAll('.st-spokes line');
+  // линейный подъём 0..1 на отрезке [a,b] — чтобы не копировать clamp везде
+  function ramp(p, a, b) { return Math.max(0, Math.min(1, (p - a) / (b - a))); }
 
   function applyProgress() {
     const s = scale();
     const start = stTopS();
     const p = Math.max(0, Math.min(1, (window.scrollY - start) / (PIN * s)));
 
+    // Фазы (в долях PIN=2700; длины фаз в px сохранены от прежней версии):
+    // подход 0–521.6 (шарик и текст съезжаются до первого касания),
+    // расщепление 521.6–575.6, прилёт осколков 756, пары 810–1710,
+    // текст растворяется на кромке окружности 1516–1576,
+    // вопрос 1656–1728, финал: вопрос держится до 1890, исчезает к 2052,
+    // спицы 1944–2322
     if (p <= P1) {
       const k = p / P1;
-      dotMain.style.transform = 'translateX(' + (-370 + 230 * k) + 'px)';
-      textEl.style.transform = 'translateX(' + (654 - 866 * k) + 'px)';
+      dotMain.style.transform = 'translateX(' + (-370 + 222.16 * k) + 'px)';
+      textEl.style.transform = 'translateX(' + (654 - 836.47 * k) + 'px)';
+      // базовое правило .no-tl прячет фразу (opacity:0) — включаем её здесь
+      textEl.style.opacity = '1';
       dotMain.style.opacity = '1';
       p1.style.opacity = '0';
       p2.style.opacity = '0';
       p1.style.transform = 'translate(0,0)';
       p2.style.transform = 'translate(0,0)';
     } else if (p <= P2) {
+      // окно расщепления (54px): шарик замер в точке контакта и гаснет,
+      // на его месте проявляются осколки — линейно, как в CSS-таймлайне
       const k = (p - P1) / (P2 - P1);
-      textEl.style.transform = 'translateX(-212px)';
-      dotMain.style.transform = 'translateX(-140px)';
-      dotMain.style.opacity = String(Math.max(0, 1 - k * 4));
-      const o = String(Math.min(1, k * 4));
+      textEl.style.transform = 'translateX(' + TEXT_TX + 'px)';
+      textEl.style.opacity = '1';
+      dotMain.style.transform = 'translateX(' + DOT_TX + 'px)';
+      dotMain.style.opacity = String(1 - k);
+      const o = String(k);
       p1.style.opacity = o;
       p2.style.opacity = o;
-      p1.style.transform = 'translate(' + (54.7 * k) + 'px,' + (-126.1 * k) + 'px)';
-      p2.style.transform = 'translate(' + (65.4 * k) + 'px,' + (162.6 * k) + 'px)';
+      p1.style.transform = 'translate(0,0)';
+      p2.style.transform = 'translate(0,0)';
     } else {
-      const k = (p - P2) / (1 - P2);
-      textEl.style.transform = 'translateX(' + (-212 - 1442 * k) + 'px)';
-      dotMain.style.transform = 'translateX(-140px)';
+      // осколки летят до окружности (210° и 150°): прилёт на p=0.28 (756px)
+      const k = ramp(p, P2, 0.28);
+      textEl.style.transform = 'translateX(' + (TEXT_TX - 1471.53 * ramp(p, P2, 0.6667)) + 'px)';
+      // текст растворяется, когда его правый край пересёк левую кромку
+      // окружности (tx = -1313.31 → p=0.5617), не доезжая до края экрана
+      textEl.style.opacity = String(1 - ramp(p, 0.5617, 0.5839));
+      dotMain.style.transform = 'translateX(' + DOT_TX + 'px)';
       dotMain.style.opacity = '0';
       p1.style.opacity = '1';
       p2.style.opacity = '1';
-      p1.style.transform = 'translate(54.7px,-126.1px)';
-      p2.style.transform = 'translate(65.4px,162.6px)';
+      p1.style.transform = 'translate(' + (47.94 * k) + 'px,' + (-151.34 * k) + 'px)';
+      p2.style.transform = 'translate(' + (47.94 * k) + 'px,' + (147.97 * k) + 'px)';
     }
 
     if (pairSteps) {
@@ -101,7 +153,16 @@
         const o = Math.max(0, Math.min(1, (p - st.a) / (st.b - st.a)));
         for (let j = 0; j < st.els.length; j++) st.els[j].style.opacity = String(o);
       }
-      questionEl.style.opacity = String(Math.max(0, Math.min(1, (p - 0.92) / 0.04)));
+      // вопрос появляется как раньше (1656–1728px), в финале пина исчезает,
+      // уступая место кольцу со спицами (кадр 65 макета)
+      questionEl.style.opacity = String(ramp(p, 0.6133, 0.64) * (1 - ramp(p, 0.7, 0.76)));
+      // спицы вытягиваются от кружков к центру: stroke-dashoffset 275 → 0
+      // (1944–2322px); линии направлены от точки к центру, поэтому
+      // dash раскрывается с внешнего конца
+      const spokeOffset = 275 * (1 - ramp(p, 0.72, 0.86));
+      for (let i = 0; i < spokes.length; i++) {
+        spokes[i].style.strokeDashoffset = String(spokeOffset);
+      }
     }
 
     const y = window.scrollY;

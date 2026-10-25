@@ -15,7 +15,7 @@
   if (!isReload) return;
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.addEventListener('load', function () {
-    if (/#(hero|card|td)-step\d$/.test(location.hash)) return;
+    if (/#(hero|card|td|sci)-step\d$/.test(location.hash)) return;
     window.scrollTo(0, 0);
   });
 })();
@@ -100,19 +100,42 @@
 <!-- 2. BLACK STATEMENT (пинится скроллом, элементы рулятся скрабом) -->
 <div class="statement-pin">
 <section class="sec sec-dark sec-statement">
+  <!-- 12 радиальных спиц на окружности (центр 640,416, R≈275) — финальный кадр
+       макета (кадр 65): текст исчезает, остаются кольцо точек и спицы. Линии
+       направлены ОТ кружка К центру: dash-анимация растёт от начала линии,
+       поэтому спица вытягивается из точки к центру. Стоят ДО точек, чтобы
+       быть под ними -->
+  <svg class="st-spokes" width="1280" height="832" viewBox="0 0 1280 832" fill="none" aria-hidden="true">
+    <line x1="915"    y1="416"    x2="640" y2="416"/>
+    <line x1="878.16" y1="553.5"  x2="640" y2="416"/>
+    <line x1="777.5"  y1="654.16" x2="640" y2="416"/>
+    <line x1="640"    y1="691"    x2="640" y2="416"/>
+    <line x1="502.5"  y1="654.16" x2="640" y2="416"/>
+    <line x1="401.84" y1="553.5"  x2="640" y2="416"/>
+    <line x1="365"    y1="416"    x2="640" y2="416"/>
+    <line x1="401.84" y1="278.5"  x2="640" y2="416"/>
+    <line x1="502.5"  y1="177.84" x2="640" y2="416"/>
+    <line x1="640"    y1="141"    x2="640" y2="416"/>
+    <line x1="777.5"  y1="177.84" x2="640" y2="416"/>
+    <line x1="878.16" y1="278.5"  x2="640" y2="416"/>
+  </svg>
   <div class="dot dot-white"></div>
   <span class="dot dot-white dot-piece p1"></span>
   <span class="dot dot-white dot-piece p2"></span>
+  <!-- 12 кружков макета стоят на окружности центр (640,416), R≈299.31, шаг 30°;
+       left/top = центр минус половина размера (10.69). Figma-координаты x/y
+       ПОВЁРНУТЫХ квадратов сюда подставлять нельзя — это угол трансформа,
+       а не видимый левый-верхний край (из-за этого кружки «уводило» с окружности) -->
   <span class="dot circle-dot pair5a" style="left:330px;top:405.31px;"></span>
   <span class="dot circle-dot pair5b" style="left:928.62px;top:405.31px;"></span>
-  <span class="dot circle-dot pair2a" style="left:650.69px;top:106px;"></span>
-  <span class="dot circle-dot pair2b" style="left:650.69px;top:704.62px;"></span>
-  <span class="dot circle-dot pair3a" style="left:804.26px;top:152.88px;"></span>
-  <span class="dot circle-dot pair3b" style="left:504.95px;top:671.30px;"></span>
-  <span class="dot circle-dot pair4a" style="left:913.81px;top:270.26px;"></span>
-  <span class="dot circle-dot pair4b" style="left:785.74px;top:689.81px;"></span>
-  <span class="dot circle-dot pair1a" style="left:486.43px;top:171.39px;"></span>
-  <span class="dot circle-dot pair1b" style="left:903.12px;top:580.26px;"></span>
+  <span class="dot circle-dot pair2a" style="left:629.31px;top:106px;"></span>
+  <span class="dot circle-dot pair2b" style="left:629.31px;top:704.62px;"></span>
+  <span class="dot circle-dot pair3a" style="left:778.97px;top:146.1px;"></span>
+  <span class="dot circle-dot pair3b" style="left:479.65px;top:664.52px;"></span>
+  <span class="dot circle-dot pair4a" style="left:888.52px;top:255.66px;"></span>
+  <span class="dot circle-dot pair4b" style="left:778.97px;top:664.52px;"></span>
+  <span class="dot circle-dot pair1a" style="left:479.65px;top:146.1px;"></span>
+  <span class="dot circle-dot pair1b" style="left:888.52px;top:554.97px;"></span>
   <p class="statement-40">Не спешите верить заголовку, задайтесь вопросом</p>
   <p class="statement-question">Учёные доказали<br>или нам так сказали?</p>
 </section>
@@ -143,6 +166,12 @@
   </div>
 
   <img class="lines-svg" src="assets/svg/check.svg" alt="">
+
+  <!-- катыш: шарик на основной линии (чёрный, базовый цвет .cl-ball). Путь
+       и границу проявления svg считает js/check.js по скроллу; появляется
+       из-под экрана «Не спешите верить заголовку…», растворяется на хвосте
+       линии -->
+  <span class="cl-ball" aria-hidden="true"></span>
 </section>
 
 <!-- 4. BENEFITS 01/-06/ -->
@@ -150,8 +179,9 @@
   <h2 class="h40 med caps">Не верьте всему,<br>но и не пропускайте важное</h2>
   <p class="lead18" style="position:absolute;left:100px;top:150px;width:620px;">Каждый день мы видим десятки «научных» новостей. Проверка нужна не для того, чтобы сомневаться во всём, а чтобы понимать, на что действительно стоит обратить внимание.</p>
 
-  <div class="benefit-cell" style="left:100px;top:269px;width:355px;height:257px;"></div>
-  <div class="benefit" style="left:100px;top:269px;">
+  <!-- как у ячеек 03/06, подсветка идёт до края экрана, а не до границы таблицы -->
+  <div class="benefit-cell" style="left:0px;top:269px;width:455px;height:257px;"></div>
+  <div class="benefit" style="left:115px;top:269px;">
     <div class="benefit-num">01/</div>
     <h3 class="benefit-h">Меньше шума</h3>
     <p class="benefit-p">Отсекайте кликбейт, домыслы и выводы, которых нет в источнике.</p>
@@ -168,19 +198,21 @@
     <h3 class="benefit-h">Защита от манипуляций</h3>
     <p class="benefit-p">Громкие слова вроде «учёные доказали» перестают работать как безусловный аргумент.</p>
   </div>
-  <div class="benefit-cell" style="left:100px;top:545px;width:355px;height:237px;"></div>
-  <div class="benefit" style="left:100px;top:545px;">
+  <!-- нижний ряд: подсветка от линии-разделителя (526), где стоит верх текста — неважно,
+       ячейка лишь зона ховера; тянется до нижнего края экрана (832), без белой полосы под линией -->
+  <div class="benefit-cell" style="left:0px;top:526px;width:455px;height:306px;"></div>
+  <div class="benefit" style="left:115px;top:545px;">
     <div class="benefit-num">04/</div>
     <h3 class="benefit-h">Экономия времени</h3>
     <p class="benefit-p">Не нужно искать первоисточники, сравнивать публикации и расшифровывать научный язык вручную.</p>
   </div>
-  <div class="benefit-cell" style="left:455px;top:545px;width:370px;height:237px;"></div>
+  <div class="benefit-cell" style="left:455px;top:526px;width:370px;height:306px;"></div>
   <div class="benefit" style="left:470px;top:545px;">
     <div class="benefit-num">05/</div>
     <h3 class="benefit-h">Меньше ошибок в решениях</h3>
     <p class="benefit-p">Проверка помогает не менять привычки, планы или мнение из-за громкого, но недоказанного заголовка.</p>
   </div>
-  <div class="benefit-cell" style="left:825px;top:545px;width:455px;height:237px;"></div>
+  <div class="benefit-cell" style="left:825px;top:526px;width:455px;height:306px;"></div>
   <div class="benefit" style="left:840px;top:545px;">
     <div class="benefit-num">06/</div>
     <h3 class="benefit-h">Сохранять доверие к науке</h3>
@@ -258,7 +290,14 @@
 </section>
 </div>
 
-<!-- 7. УЧЁНЫЕ ДОКАЗАЛИ -->
+<!-- 7. УЧЁНЫЕ ДОКАЗАЛИ (fade-переход с карточки 04: жест вниз — экран
+     проявляется поверх карточки, жест вверх — растворяется; запуск —
+     js/cards.js, CSS-классы .sci-fade-in/.sci-fade-out). Хвост пина —
+     отдельный экран (Figma 1836:934): скролл растягивает sci-mask из панели
+     на весь экран, дефолт фонарика доезжает в центр (326;416); секцию на
+     это время держит ручной пин transform'ом (js/scientists.js, паттерн
+     no-tl ветки teardown.js — sticky не цепляется к окну при скролле на body) -->
+<div class="sci-pin">
 <section class="sec sec-white sec-scientists">
   <h2 class="sci-title">«Учёные доказали:<br>[X] меняет вашу жизнь»</h2>
   <img class="lines-svg" src="assets/svg/scientists_rules.svg" alt="">
@@ -271,13 +310,18 @@
   <p class="sci-body"><i class="orange">«Учёные доказали»</i> — самая убедительная фраза в интернете, и самая удобная для манипуляций.<br>
   Мы верим исследованиям, экспертам и сложным словам, Но за научным аргументом может скрываться всё что угодно: несуществующая статья, маленькая выборка, вывод, которого учёные никогда не делали.</p>
 
-  <div class="sci-panel"></div>
+  <!-- типовые кружки макета (1779:721) на углах панели: при развёртке
+       едут вместе с углами и гаснут от --p (на фулскрине 1836:934 их нет) -->
+  <div class="sci-panel">
+    <i class="sci-dot tl"></i><i class="sci-dot tr"></i><i class="sci-dot bl"></i><i class="sci-dot br"></i>
+  </div>
   <img class="lines-svg" src="assets/svg/scientists_dots.svg" alt="">
 
   <div class="sci-mask">
     <p class="sci-questions">«Учёные» / кто именно?<br>«доказали» / каким исследованием?<br>«меняет жизнь» / вывод статьи/<br>автора поста?</p>
   </div>
 </section>
+</div>
 
 <!-- 8. TEARDOWN (пин: табы публикация → контекст → первоисточник → вердикт переключаются по порогам скролла, сам переход всегда с фиксированной скоростью) -->
 <div class="td-pin">
@@ -364,7 +408,7 @@
 <section class="sec sec-checklist">
   <hr class="divider" style="top:70px;">
   <div class="cl-ticker">
-    <span>НЕ ВЕРЬТЕ ЗАГОЛОВКУ — ИЗУЧАЙТЕ <span class="ctx-inline"><span class="br">[</span>КОНТЕКСТ<span class="br">]</span></span></span>
+    <span>НЕ ВЕРЬТЕ ЗАГОЛОВКУ — ИЗУЧАЙТЕ <span class="ctx-inline"><span class="br br-l">[</span><span class="ctx-word"><span class="ch">К</span><span class="ch">О</span><span class="ch">Н</span><span class="ch">Т</span><span class="ch">Е</span><span class="ch">К</span><span class="ch">С</span><span class="ch">Т</span></span><span class="br br-r">]</span></span></span>
   </div>
   <hr class="divider" style="top:213px;">
 
@@ -424,6 +468,10 @@
 
   <!-- connectors -->
   <img class="lines-svg" style="width:1280px;height:3903px;" src="assets/svg/checklist.svg" alt="">
+
+  <!-- катыш: шарик на основной линии коннекторов. Путь и границу проявления
+       svg (видно выше шарика, ниже скрыто) считает js/checklist.js по скроллу -->
+  <span class="cl-ball" aria-hidden="true"></span>
 </section>
 
 <!-- 11b. ВЫВОД (orange) -->
@@ -464,6 +512,11 @@
   </div>
 
   <img class="lines-svg" src="assets/svg/decor_dark.svg" alt="">
+
+  <!-- катыш: шарик на основной линии (белый, как линия). Путь и границу
+       проявления svg считает js/decor.js по скроллу; появляется из-под
+       экрана «Вывод» -->
+  <span class="cl-ball" aria-hidden="true"></span>
 </section>
 
 <!-- 12. FINALE -->
@@ -494,6 +547,11 @@
   <hr class="orange-rule" style="top:762px;">
 
   <img class="lines-svg" src="assets/svg/finale_lines.svg" alt="">
+
+  <!-- катыш: шарик на основной линии (чёрный, базовый цвет .cl-ball — фон
+       секции светлый). Путь и границу проявления svg считает js/decor.js;
+       на стыке с тёмным экраном шарик «меняет цвет» с белого на чёрный -->
+  <span class="cl-ball" aria-hidden="true"></span>
 </section>
 
 </div>
@@ -502,6 +560,9 @@
 <script src="js/hero.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/teardown.js"></script>
+<script src="js/checklist.js"></script>
+<script src="js/check.js"></script>
+<script src="js/decor.js"></script>
 <script src="js/sides.js"></script>
 <script src="js/scientists.js"></script></body>
 </html>
