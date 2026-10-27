@@ -224,18 +224,45 @@ body.sides-dark { background: var(--black); }
 
 .statement-40 {
   position: absolute;
-  left: 526px; top: 403px;
+  /* top выверен так, чтобы шарик (центр 417.69 = 407 + 21.38/2) стоял по
+     оптическому центру строки. Метрики IBM Plex Mono (hhea): ascent 1025,
+     descent 275, lineGap 0 → при 40px normal line-height = 52px и
+     baseline = top + 41 (полулидер 0). Чернила строки: верх — бревис «й»
+     (768/1000·40 = 30.72px над baseline), низ — «у»/«р» (−200/1000·40 = 8px)
+     → центр чернил = baseline − (30.72 − 8)/2 = baseline − 11.36px.
+     Итог: baseline = 417.69 + 11.36 = 429.05 → top = 429.05 − 41 = 388.05
+     (прежний top 403 давал baseline 444 — шарик стоял у верха букв).
+     Экран 5 (.sec-statement2) перекрывает top своим значением — не тронут */
+  left: 526px; top: 388.05px;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px;
   width: 720px;
 }
-.sec-statement .statement-40 { width: auto; white-space: nowrap; }
+.sec-statement .statement-40 {
+  width: auto; white-space: nowrap;
+  /* буквы растворяются, уходя ЛЕВЕЕ шарика (его левая кромка стоит на 322.16px
+     страничных координат с момента контакта и до конца пина — см. keyframes
+     stDot: transform заморожен на -147.84px, правый край шарика = 470-147.84+21.38).
+     Маска в локальных координатах текста: полоса растворения 60px (как прежний
+     fade) стоит влево от этой кромки → позиция маски = -263.84 - tx (tx = сдвиг
+     текста в stText). Размер 4000px > ширины текста, чтобы чёрная часть градиента
+     всегда накрывала текст справа, а всё левее полосы оставалось скрытым.
+     Положение маски едет в tl-ветке через stTextMask, в no-tl — из hero.js */
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0, #000 60px, #000 4000px);
+  -webkit-mask-size: 4000px 100%;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: -917.84px 0;
+  mask-image: linear-gradient(to right, rgba(0,0,0,0) 0, #000 60px, #000 4000px);
+  mask-size: 4000px 100%;
+  mask-repeat: no-repeat;
+  mask-position: -917.84px 0;
+}
 .sec-statement .dot-white { left: 470px; top: 407px; }
 
 /* скролл-скраб: элементы скрабятся по
    сближение -> столкновение -> осколки по окружности -> текст по центру ->
-   текст улетает влево и растворяется на кромке окружности, растут 12 спиц
-   (финальный кадр макета).
+   текст улетает влево, буквы растворяются на маске влево от левой кромки
+   шарика (322.16px), растут 12 спиц (финальный кадр макета).
    PIN 2700: последние 900px отданы финальной фазе; старые фазы сохраняют
    абсолютную длину в px скролла, поэтому их проценты пересчитаны (px/2700).
    Диапазон анимации ниже задан в процентах как запасной вариант: hero.js
@@ -286,20 +313,32 @@ body.sides-dark { background: var(--black); }
 }
 
 .statement-pin.tl .sec-statement .statement-40 {
-  animation: stText linear both;
+  animation: stText linear both, stTextMask linear both;
   animation-timeline: --statement;
   animation-range: cover 19.065% cover 80.935%;
 }
 @keyframes stText {
-  0%     { transform: translateX(654px); opacity: 1; }
-  19.32% { transform: translateX(-182.47px); opacity: 1; } /* первое касание буквы */
-  21.31% { transform: translateX(-182.47px); opacity: 1; } /* держится, пока шарик гаснет */
-  /* правый край текста (526 + tx + 1128) дошёл до левой кромки окружности
-     (640 - 299.31 ≈ 340.7) → tx = -1313.31 на p=56.17%; дальше текст
-     доехал бы до края экрана, но растворяется прямо у окружности */
-  56.17% { transform: translateX(-1313.31px); opacity: 1; }
-  58.39% { transform: translateX(-1385px); opacity: 0; } /* 60px растворения в движении */
-  66.67%, 100% { transform: translateX(-1654px); opacity: 0; }
+  0%     { transform: translateX(654px); }
+  19.32% { transform: translateX(-182.47px); } /* первое касание буквы */
+  21.31% { transform: translateX(-182.47px); } /* держится, пока шарик гаснет */
+  /* движение прежнее: правый край текста доезжает до левой кромки окружности
+     (56.17%, tx = -1313.31) и дальше до 66.67% — но виден он только до
+     левой кромки шарика: растворение теперь делает маска stTextMask,
+     а не opacity (буквы исчезают, уходя левее шарика) */
+  56.17% { transform: translateX(-1313.31px); }
+  66.67%, 100% { transform: translateX(-1654px); }
+}
+
+/* позиция маски растворения: полоса 60px стоит влево от левой кромки шарика
+   (322.16px страничных координат = локальная -203.84 - tx) → позиция = -263.84 - tx.
+   Те же стопы, что и в stText, — обе анимации линейны на одних участках, поэтому
+   синхронны на каждом кадре. Значение на 0% (-917.84px) также стоит в базовом
+   правиле .sec-statement .statement-40 — до старта анимации маска ничего не скрывает */
+@keyframes stTextMask {
+  0%            { -webkit-mask-position: -917.84px 0; mask-position: -917.84px 0; }
+  19.32%, 21.31% { -webkit-mask-position: -81.37px 0; mask-position: -81.37px 0; }
+  56.17%        { -webkit-mask-position: 1049.47px 0; mask-position: 1049.47px 0; }
+  66.67%, 100%  { -webkit-mask-position: 1390.16px 0; mask-position: 1390.16px 0; }
 }
 
 /* осколки стартуют там, где шарик замер при контакте с буквой:
@@ -597,25 +636,32 @@ body.sides-dark { background: var(--black); }
 ========================================================= */
 
 /* ---- переход 04 → «Учёные доказали» ----
-   Дискретный fade (как ленты карточек): один жест = одно переключение,
-   скролл прогрессом не рулит. Запускает cards.js классами на .sec-scientists:
-   .sci-fade-in — жест вниз с карточки 04: экран проявляется поверх неё
-   (сама карточка стоит в потоке, скролл не трогается), в конце мгновенный
-   скролл на верх .sci-pin и сброс класса — экран уже лежит в потоке сам;
-   .sci-fade-out — жест вверх с «Учёные доказали»: сначала мгновенный скролл
-   на карточку 04 (экран ещё накрыт классом), затем экран растворяется,
-   открывая карточку. Смещение -832px — layout-px: экран на экран выше
-   (компенсирует собственное положение в потоке под карточкой 04).
-   Длительность и кривая — как у .ribbon (620ms). */
+   Триггер по скроллу (как табы teardown): порог — середина зоны перехода
+   (cardTop 04 + 416·scale), его пересекает ЛЮБОЙ скролл (колесо, скроллбар,
+   инерция тачпада), а сам кроссфейд всегда играет фиксированные 620 мс —
+   скоростью скролла управлять нельзя. Запускает js/cards.js:
+   .sci-on (на .sci-pin) — состояние «экран показан» (видимость секции);
+   .sci-gate (на .sci-pin) — JS-режим видимости, ставится при инициализации;
+   .sci-anim-in/.sci-anim-out (на .sec-scientists) — разовый кроссфейд.
+   Зона перехода — [cardTop 04, cardTop 04 + 832·scale] (ровно один экран
+   скролла): на всём её протяжении карточка 04 приколота к вьюпорту
+   translateY(+dy) (fadePin в js/cards.js), а экран учёных приколот
+   встречным сдвигом translateY(−832…0) (кламп −FADE в scrub
+   js/scientists.js) — оба цельным экраном в кадре, кроссфейд играет
+   поверх неподвижной карточки. Сверху зона сшита «под крышкой»:
+   к её концу экран учёных уже непрозрачен и прикрывает скачок снятия
+   приклейки карточки. Число FADE=832 держать синхронным в js/cards.js
+   и js/scientists.js. */
 .sci-pin {
   position: relative;
-  /* 832 экран + 832 растяжения маски до фулскрина + 832 стоянки на нём.
-     Хвост пина — отдельный экран из макета (1836:934): при скролле маска-
-     панель растягивается на весь экран (скраб --p в js/scientists.js),
-     секцию на это время прикалывает вручную transform (см. scrub там же):
-     position:sticky тут нельзя — body с overflow-x:hidden остаётся
-     scroll-контейнером (overflow-y считается auto) и sticky
-     прицепляется к нему, а не к окну */
+  /* 832 экран + 832 зона триггера разворота (порог — её середина) +
+     832 стоянки на фулскрине. Хвост пина — отдельный экран из макета
+     (1836:934): скролл только ПЕРЕКЛЮЧАЕТ состояние разворота, сам
+     разворот маски-панели играет фиксированные 620 мс (твин --p в
+     js/scientists.js), секцию на это время прикалывает вручную
+     transform (см. scrub там же): position:sticky тут нельзя —
+     body с overflow-x:hidden остаётся scroll-контейнером (overflow-y
+     считается auto) и sticky прицепляется к нему, а не к окну */
   height: 2496px;
 }
 /* поверх руки-лупы (z-index 2) и карточки 04: экран закрывает их целиком */
@@ -626,19 +672,25 @@ body.sides-dark { background: var(--black); }
    она вспыхнула бы под fade-переходом с карточки 04 */
 .sci-pin.sciexp-dark { background: var(--black); }
 
-.sci-fade-in {
-  animation: sciFadeIn 620ms cubic-bezier(.77,0,.18,1) both;
-}
-.sci-fade-out {
-  animation: sciFadeOut 620ms cubic-bezier(.77,0,.18,1) both;
-}
+/* видимость секции: режим включает .sci-gate (ставит cards.js при
+   инициализации) — в состоянии «карточка 04» секция учёных скрыта,
+   .sci-on включает её. Без JS классов нет и секция остаётся видимой
+   по геометрии потока (зона перехода выглядит пустым экраном) */
+.sci-pin.sci-gate .sec-scientists { opacity: 0; visibility: hidden; }
+.sci-pin.sci-gate.sci-on .sec-scientists { opacity: 1; visibility: visible; }
+
+/* ---- анимации перехода (только прозрачность; геометрию ведёт скролл) ----
+   620ms и кривая — как у .ribbon и старых fade. Классы вешает cards.js
+   на .sec-scientists; видимость в это время держит .sci-on на обёртке */
+.sec-scientists.sci-anim-in { animation: sciFadeIn 620ms cubic-bezier(.77,0,.18,1) both; }
+.sec-scientists.sci-anim-out { animation: sciFadeOut 620ms cubic-bezier(.77,0,.18,1) both; }
 @keyframes sciFadeIn {
-  from { transform: translateY(-832px); opacity: 0; visibility: hidden; }
-  to   { transform: translateY(-832px); opacity: 1; }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes sciFadeOut {
-  from { transform: translateY(-832px); opacity: 1; }
-  to   { transform: translateY(-832px); opacity: 0; }
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 .sci-title {
@@ -696,12 +748,13 @@ body.sides-dark { background: var(--black); }
 .sci-dot.br { right: -12px; bottom: -12px; }
 /* пятно фонарика: позиция курсора над тёмной панелью (js/scientists.js);
    дефолт 226/177 — центр пятна из макета (при p=0), дальше его доезжает
-   скраб вместе с растяжкой. Круг 140px = эллипс 280 из макета, кромка
+   твин вместе с растяжкой. Круг 140px = эллипс 280 из макета, кромка
    добита блюром 61: ядро 100% до 66px, 30% на радиусе 140, ноль к 205px.
    --p (0..1) — прогресс растяжения маски из панели (100/433, 1080×350)
    в фулскрин-экран (0/0, 1280×832, макет 1836:934): вся геометрия маски
-   и текста внутри — линейная интерполяция от p, ставит его скроллом
-   js/scientists.js. Fallback 0 в var() — на случай выключенного JS
+   и текста внутри — линейная интерполяция от p, ставит его твином
+   состояния js/scientists.js (скролл только переключает разворот).
+   Fallback 0 в var() — на случай выключенного JS
    и браузеров без @property (тогда --p просто токен) */
 @property --mx { syntax: '<length-percentage>'; inherits: false; initial-value: 226px; }
 @property --my { syntax: '<length-percentage>'; inherits: false; initial-value: 177px; }
@@ -1174,6 +1227,14 @@ body.sides-dark { background: var(--black); }
 /* =========================================================
    12. FINALE
 ========================================================= */
+
+/* Пин хвоста финала: обёртка выше экрана на недостающий скролл — столько,
+   чтобы чёрный шарик доехал до конца хребта на константных 2/3 ровно к
+   последнему px страницы. Высоту в px выставляет js/decor.js (syncPin),
+   ниже 832px — фолбэк без JS: пина нет, svg полностью виден. Сам экран
+   прикалывает transform из js (sticky нельзя: body с overflow-x:hidden
+   остаётся scroll-контейнером — см. sci-pin выше), как у td-pin/sci-pin */
+.fin-pin { position: relative; height: 832px; }
 
 .fin-lead {
   position: absolute;

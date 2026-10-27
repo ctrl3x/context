@@ -1,0 +1,331 @@
+/* =========================================================
+   МОБИЛЬНАЯ ВЕРСИЯ — мокап Figma 1972:766, канва 414×15964
+   Статичный лонг-рид (вариант C): нативный скролл, никаких
+   пинов и скролл-механик; единственный JS — масштаб (mobile.js).
+   Координаты элементов заданы inline (дизайн-пиксели канвы),
+   локально внутри секций (глобальные минус y0 экрана).
+   Референс: proof/mobile-spec.txt, proof/mobile-1972-766.json.
+   ========================================================= */
+
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --orange: #fc6030;
+  --red: #ff3c00;
+  --gray: #555555;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { background: var(--white); }
+
+/* масштабируемая канва: js/mobile.js ставит transform и высоту обёртки */
+#m-page { position: relative; margin: 0 auto; }
+#m-inner { width: 414px; transform-origin: 0 0; }
+
+.m-sec { position: relative; overflow: hidden; } /* клиппит диагонали за краем экрана */
+
+/* декоративный слой секции: линии, кружки, рамки (inline-SVG) */
+.m-decor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+/* весь контент — над декором; координаты у каждого элемента свои (inline) */
+.m-sec > :not(.m-decor) { position: absolute; z-index: 1; }
+
+/* ---------- фоны секций (экраны макета) ---------- */
+
+.m-hero, .m-benefits, .m-sci, .m-list, .m-finale { background: var(--white); }
+.m-quest, .m-statement, .m-card, .m-decor-sec { background: var(--black); }
+.m-concl { background: var(--orange); }
+/* высоты — ровно по мокапу; сумма 15964 = высота канвы 1972:766 */
+.m-hero     { height: 1792px; }
+.m-benefits { height: 3400px; }
+.m-list     { height: 4500px; }
+.m-quest, .m-statement, .m-card, .m-sci, .m-concl, .m-decor-sec, .m-finale { height: 896px; }
+
+/* ---------- герой ---------- */
+
+.m-h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 50px; font-weight: 400; line-height: 100%;
+  color: var(--black);
+}
+.m-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px; font-weight: 500; line-height: 130%;
+  text-align: right;
+  color: var(--red);
+}
+.m-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 64px; font-weight: 400; line-height: 130%;
+  color: var(--orange);
+}
+.m-q {
+  font-family: 'Arsenal', serif;
+  font-size: 20px; line-height: 125%;
+  color: var(--black);
+}
+
+/* ---------- пилюли-теги (12px, как на десктопе) ---------- */
+
+.m-pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; line-height: 8px;
+  color: var(--gray);
+  border: 1px solid var(--gray);
+  border-radius: 120px;
+  padding: 7px 10px;
+  margin: 0 10px 10px 0;
+  white-space: nowrap;
+}
+/* контейнер .m-tags — поток inline-block, позиция inline'ом */
+
+/* ---------- виджеты 278px (автолей-инстансы мокапа) ---------- */
+
+.m-widget { width: 278px; padding: 15px 16px; }
+.m-widget-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px; font-weight: 300; line-height: 120%;
+  letter-spacing: 0.15em;
+}
+.m-wx { flex: none; }
+.m-widget-note {
+  margin-top: 16px;
+  font-family: 'Arsenal', serif;
+  font-size: 20px; line-height: 110%;
+}
+/* в финале заметки виджетов — 16px (мокап) */
+.mw-sm .m-widget-note { font-size: 16px; }
+
+.mw-orange { background: var(--orange); color: var(--white); }
+.mw-gray   { background: var(--gray);   color: var(--white); }
+.mw-white  { background: var(--white);  color: var(--black); border: 1px solid var(--black); }
+
+/* ---------- «Проверять…» + польза 01–06 ---------- */
+
+.m-h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px; font-weight: 500; line-height: 110%;
+  color: var(--black);
+}
+.m-lead20 {
+  font-family: 'Arsenal', serif;
+  font-size: 20px; line-height: 125%;
+  color: var(--black);
+}
+.m-body16 {
+  font-family: 'Arsenal', serif;
+  font-size: 16px; line-height: 125%;
+  color: var(--black);
+}
+.m-h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 38px; font-weight: 500; line-height: 130%;
+  color: var(--black);
+}
+/* тело пункта пользы: в мокапе у 01 — 16px, у 02–06 — 18px;
+   унифицировано на 18px (согласовано при переносе) */
+.m-bb {
+  font-family: 'Arsenal', serif;
+  font-size: 18px; line-height: 125%;
+  color: var(--black);
+}
+.m-bt {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 23px; font-weight: 500; line-height: 130%;
+  text-transform: uppercase;
+  color: var(--black);
+}
+
+/* ---------- стейтменты ---------- */
+
+.m-st {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 29px; font-weight: 400; line-height: 130%;
+  color: var(--white);
+}
+.m-st2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px; font-weight: 400; line-height: 130%;
+  text-align: center;
+  color: var(--white);
+}
+
+/* ---------- карточка 01 ---------- */
+
+.m-card-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 128px; font-weight: 400; line-height: 130%;
+  color: var(--white);
+}
+.m-card-t {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 32px; font-weight: 400; line-height: 130%;
+  color: var(--white);
+}
+.m-card-p {
+  font-family: 'Arsenal', serif;
+  font-size: 16px; line-height: 125%;
+  color: var(--white);
+}
+/* пагинация карточки: 4 точки 12px, шаг 22px */
+.m-pg {
+  width: 12px; height: 12px; border-radius: 60px;
+  border: 1px solid var(--gray);
+  background: transparent;
+}
+.m-pg--on { background: var(--gray); border-color: var(--gray); }
+
+/* статичный кадр тикера [Контекст]: скобки — Roboto Mono,
+   буквы — Plex Mono с раздвинутым трекингом (кадр из мокапа) */
+.m-tick {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 500; line-height: 1;
+  letter-spacing: 0.16em;
+  color: var(--gray);
+  white-space: nowrap;
+}
+.m-tick i {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px; font-weight: 400; font-style: normal;
+  letter-spacing: -0.18em;
+  color: var(--orange);
+}
+.m-tick span { margin-left: 3px; }
+
+/* ---------- «Учёные доказали…» ---------- */
+
+.m-sci-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 50px; font-weight: 500; line-height: 130%;
+  color: var(--black);
+}
+.m-sci-b {
+  font-family: 'Arsenal', serif;
+  font-size: 18px; line-height: 125%;
+  color: var(--black);
+}
+.m-sci-b i { font-style: italic; color: var(--orange); }
+
+/* ---------- чек-лист ---------- */
+
+.m-cl-h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 44px; font-weight: 500; line-height: 130%;
+  color: var(--black);
+}
+.m-cl-t {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 36px; font-weight: 500; line-height: 130%;
+  color: var(--black);
+}
+.m-cl-lead {
+  font-family: 'Arsenal', serif;
+  font-size: 20px; line-height: 125%;
+  color: var(--black);
+}
+/* [контекст] в шапке чек-листа */
+.m-cltick {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 44px; font-weight: 500; line-height: 1;
+  color: var(--black);
+  white-space: nowrap;
+}
+.m-cltick i {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 40px; font-weight: 500; font-style: normal;
+  letter-spacing: -0.18em;
+  color: var(--orange);
+}
+.m-cltick span { margin-left: 8px; }
+
+.m-num80 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 80px; font-weight: 400; line-height: 130%;
+  color: var(--orange);
+}
+.m-item-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 29px; font-weight: 500; line-height: 100%;
+  color: var(--black);
+}
+.m-item-q {
+  font-family: 'Arsenal', serif;
+  font-size: 20px; font-style: italic; line-height: 125%;
+  color: var(--orange);
+}
+.m-quote {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px; font-style: italic; line-height: 130%;
+  color: var(--orange);
+}
+.m-item-p {
+  font-family: 'Arsenal', serif;
+  font-size: 20px; line-height: 125%;
+  color: var(--black);
+}
+
+/* ---------- «Вывод» ---------- */
+
+.m-concl-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 80px; font-weight: 400; line-height: 130%;
+  text-align: center;
+  color: var(--white);
+}
+.m-concl-t {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px; font-weight: 400; line-height: 100%;
+  text-align: center;
+  color: var(--white);
+}
+/* крупные пилюли 27px: оранжевая с белой обводкой / белая с оранжевой */
+.m-pill-lg {
+  display: inline-flex; align-items: center;
+  height: 27px; padding: 0 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px; line-height: 1;
+  border-radius: 120px;
+  white-space: nowrap;
+}
+.mp-ow { background: var(--orange); border: 1px solid var(--white); color: var(--white); }
+.mp-wo { background: var(--white);  border: 1px solid var(--orange); color: var(--orange); }
+
+/* ---------- «Наука стала декорацией» ---------- */
+
+.m-dc-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px; font-weight: 500; line-height: 110%;
+  color: var(--white);
+}
+
+/* ---------- финал ---------- */
+
+.m-fin-h {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px; font-weight: 400; line-height: 110%;
+  color: var(--black);
+}
+.m-fin-r {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 40px; font-weight: 400; line-height: 130%;
+  text-align: right;
+  color: var(--black);
+}
+/* крупный статичный тикер [Контекст] между оранжевыми линейками */
+.m-tick-lg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 51px; font-weight: 400; line-height: 1;
+  letter-spacing: 0.2em;
+  color: var(--black);
+  white-space: nowrap;
+}
+.m-tick-lg i {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 45px; font-weight: 400; font-style: normal;
+  letter-spacing: -0.18em;
+  color: var(--orange);
+}
+.m-tick-lg span { margin-left: 9px; }

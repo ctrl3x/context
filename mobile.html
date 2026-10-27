@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Как медиа искажают исследования</title>
+<!-- Обратный редирект: на десктопных ширинах показываем index.html.
+     Проверка только при загрузке — «переключение на лету» не поддерживаем
+     (как и прямой редирект в index.html). -->
+<script>
+(function () {
+  if (window.matchMedia && matchMedia('(min-width: 768px)').matches) {
+    location.replace('index.html');
+  }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Arsenal:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+<!-- Масштабируемая канва: макет 414×15964 (Figma 1972:766), JS ставит
+     transform: scale() и высоту обёртки. Всё содержимое — дизайн-пиксели. -->
+<div id="m-page">
+<div id="m-inner">
+
+<!-- 1. ГЕРОЙ: заголовок + три вопроса (мокап Desktop_1 - 437, y0=0) -->
+<section class="m-sec m-hero">
+  <svg class="m-decor" viewBox="0 0 414 1792" aria-hidden="true">
+    <line x1="20" y1="557" x2="357" y2="557" stroke="#000" />
+    <line x1="20" y1="692" x2="357" y2="692" stroke="#000" />
+    <line x1="23" y1="1016" x2="357" y2="1016" stroke="#000" />
+    <line x1="23" y1="1151" x2="357" y2="1151" stroke="#000" />
+    <line x1="23" y1="1475" x2="360" y2="1475" stroke="#000" />
+    <line x1="23" y1="1610" x2="360" y2="1610" stroke="#000" />
+    <line x1="375" y1="476" x2="375" y2="538" stroke="#000" />
+    <line x1="375" y1="574" x2="375" y2="674" stroke="#000" />
+    <line x1="375" y1="710" x2="375" y2="782" stroke="#000" />
+    <line x1="375" y1="935" x2="375" y2="997" stroke="#000" />
+    <line x1="375" y1="1033" x2="375" y2="1133" stroke="#000" />
+    <line x1="375" y1="1169" x2="375" y2="1241" stroke="#000" />
+    <line x1="375" y1="1394" x2="375" y2="1456" stroke="#000" />
+    <line x1="375" y1="1492" x2="375" y2="1592" stroke="#000" />
+    <line x1="375" y1="1628" x2="375" y2="1700" stroke="#000" />
+    <circle cx="375" cy="556" r="9" fill="#000" />
+    <circle cx="375" cy="692" r="9" fill="#000" />
+    <circle cx="375" cy="1015" r="9" fill="#000" />
+    <circle cx="375" cy="1151" r="9" fill="#000" />
+    <circle cx="375" cy="1474" r="9" fill="#000" />
+    <circle cx="375" cy="1610" r="9" fill="#000" />
+  </svg>
+
+  <h1 class="m-h1" style="left:20px;top:50px;width:374px;">Как медиа искажают исследования</h1>
+  <p class="m-sub" style="left:20px;top:250px;width:374px;">От первого громкого тезиса<br>до тотального недоверия</p>
+
+  <div class="m-num" style="left:20px;top:473px;">01</div>
+  <p class="m-q" style="left:20px;top:587px;width:340px;">Почему мы доверяем формулировкам «учёные доказали» и «исследование показало» без проверки источника?</p>
+  <div class="m-tags" style="left:20px;top:717px;width:374px;">
+    <span class="m-pill">#учёные доказали</span><span class="m-pill">#эксперты выяснили</span>
+    <span class="m-pill">#исследование показало</span>
+  </div>
+
+  <div class="m-num" style="left:20px;top:932px;">02</div>
+  <p class="m-q" style="left:20px;top:1046px;width:340px;">Как отличить реальный научный вывод от упрощения, некорректной интерпретации или манипуляции?</p>
+  <div class="m-tags" style="left:20px;top:1176px;width:374px;">
+    <span class="m-pill">#научный вывод</span><span class="m-pill">#упрощение</span>
+    <span class="m-pill">#манипуляция</span>
+  </div>
+
+  <div class="m-num" style="left:20px;top:1391px;">03</div>
+  <p class="m-q" style="left:20px;top:1505px;width:340px;">Какие шаги помогут самостоятельно проверить научный аргумент — от вирусного поста до первоисточника?</p>
+  <div class="m-tags" style="left:20px;top:1635px;width:374px;">
+    <span class="m-pill">#проверка</span><span class="m-pill">#научный аргумент</span>
+    <span class="m-pill">#первоисточник</span>
+  </div>
+</section>
+
+<!-- 2. «Не спешите верить заголовку…» (мокап Desktop_1 - 438, y0=1792) -->
+<section class="m-sec m-quest">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <circle cx="30" cy="223" r="10" fill="#fff" />
+    <circle cx="30" cy="589" r="10" fill="#fff" />
+  </svg>
+
+  <h2 class="m-st" style="left:76px;top:207px;width:318px;">Не спешите верить заголовку, задайтесь вопросом</h2>
+  <h2 class="m-st" style="left:76px;top:569px;width:318px;">Учёные доказали <br>или нам так сказали?</h2>
+</section>
+
+<!-- 3. «Проверять — значит видеть картину целиком» + польза 01–06
+     (мокап Desktop_1 - 440 @2688, y0=2688) -->
+<section class="m-sec m-benefits">
+  <svg class="m-decor" viewBox="0 0 414 3400" aria-hidden="true">
+    <line x1="20" y1="707" x2="330" y2="707" stroke="#000" />
+    <line x1="541" y1="475" x2="362" y2="691" stroke="#000" />
+    <line x1="430" y1="881" x2="358" y2="725" stroke="#000" />
+    <line x1="80" y1="1087" x2="555" y2="1087" stroke="#000" />
+    <line x1="-79" y1="1248" x2="47" y2="1102" stroke="#000" />
+    <line x1="50" y1="1071" x2="-22" y2="915" stroke="#000" />
+    <line x1="385" y1="1826" x2="385" y2="2024" stroke="#000" />
+    <line x1="20" y1="2044" x2="367" y2="2044" stroke="#000" />
+    <line x1="385" y1="2063" x2="385" y2="2291" stroke="#000" />
+    <line x1="20" y1="2310" x2="367" y2="2310" stroke="#000" />
+    <line x1="385" y1="2329" x2="385" y2="2533" stroke="#000" />
+    <line x1="20" y1="2553" x2="367" y2="2553" stroke="#000" />
+    <line x1="385" y1="2572" x2="385" y2="2800" stroke="#000" />
+    <line x1="20" y1="2819" x2="367" y2="2819" stroke="#000" />
+    <line x1="385" y1="2838" x2="385" y2="3065" stroke="#000" />
+    <line x1="20" y1="3085" x2="367" y2="3085" stroke="#000" />
+    <line x1="385" y1="3104" x2="385" y2="3331" stroke="#000" />
+    <circle cx="350" cy="707" r="10" fill="#000" />
+    <circle cx="60" cy="1087" r="10" fill="#000" />
+    <circle cx="385" cy="2044" r="9" fill="#000" />
+    <circle cx="385" cy="2310" r="9" fill="#000" />
+    <circle cx="385" cy="2553" r="9" fill="#000" />
+    <circle cx="385" cy="2819" r="9" fill="#000" />
+    <circle cx="385" cy="3085" r="9" fill="#000" />
+  </svg>
+
+  <h2 class="m-h2" style="left:20px;top:60px;width:374px;">Проверять — значит видеть картину целиком</h2>
+  <p class="m-lead20" style="left:20px;top:232px;width:374px;">Ориентироваться в информации важно каждому, но не у каждого есть время и подготовка, чтобы читать первоисточники.</p>
+
+  <div class="m-widget mw-orange" style="left:116px;top:378px;">
+    <div class="m-widget-head"><span>##</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Проверка не должна быть привилегией специалистов</div>
+  </div>
+
+  <p class="m-body16" style="left:20px;top:607px;width:288px;">Не обязательно читать научные статьи и разбираться в методологиях самостоятельно. Достаточно понять, можно ли доверять выводу — и насколько.</p>
+
+  <div class="m-widget mw-gray" style="left:20px;top:730px;">
+    <div class="m-widget-head"><span>{}</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <!-- трекинг ужат, чтобы капс-строка встала в одну строку, как в мокапе
+         (браузерный Arsenal чуть шире фигмовского) -->
+    <div class="m-widget-note" style="letter-spacing:-0.05em;">УТОЧНЕНИЕ МЕНЯЕТ СМЫСЛ</div>
+  </div>
+
+  <p class="m-body16" style="left:116px;top:987px;width:278px;">Одно слово может превратить осторожный вывод в сенсацию. Проверка возвращает утверждению его настоящий контекст</p>
+
+  <div class="m-widget mw-white" style="left:116px;top:1107px;">
+    <div class="m-widget-head"><span>«»</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Проверка помогает увидеть первоисточник, а не только его упрощённый пересказ в медиа или соцсетях</div>
+  </div>
+
+  <h2 class="m-h3" style="left:20px;top:1452px;width:374px;">НЕ ВЕРЬТЕ ВСЕМУ,<br>НО И НЕ ПРОПУСКАЙТЕ ВАЖНОЕ</h2>
+  <p class="m-bb" style="left:20px;top:1674px;width:374px;">Каждый день мы видим десятки «научных» новостей. Проверка нужна не для того, чтобы сомневаться во всём, а чтобы понимать, на что действительно стоит обратить внимание.</p>
+
+  <div class="m-num" style="left:20px;top:1826px;">01/</div>
+  <h3 class="m-bt" style="left:20px;top:1919px;width:340px;">Меньше шума</h3>
+  <p class="m-bb" style="left:20px;top:1979px;width:374px;">Отсекайте кликбейт, домыслы и выводы, которых нет<br>в источнике.</p>
+
+  <div class="m-num" style="left:20px;top:2063px;">02/</div>
+  <h3 class="m-bt" style="left:20px;top:2156px;width:340px;">Больше ясности</h3>
+  <p class="m-bb" style="left:20px;top:2216px;width:374px;">Вместо сложного исследования — короткий вывод: что известно, что пока не доказано и где заканчиваются факты.</p>
+
+  <div class="m-num" style="left:20px;top:2329px;">03/</div>
+  <h3 class="m-bt" style="left:20px;top:2422px;width:340px;">Защита от манипуляций</h3>
+  <p class="m-bb" style="left:20px;top:2482px;width:374px;">Громкие слова вроде «учёные доказали» перестают работать как безусловный аргумент.</p>
+
+  <div class="m-num" style="left:20px;top:2572px;">04/</div>
+  <h3 class="m-bt" style="left:20px;top:2665px;width:340px;">Экономия времени</h3>
+  <p class="m-bb" style="left:20px;top:2725px;width:374px;">Не нужно искать первоисточники, сравнивать публикации и расшифровывать научный язык вручную.</p>
+
+  <div class="m-num" style="left:20px;top:2838px;">05/</div>
+  <h3 class="m-bt" style="left:20px;top:2931px;width:340px;">Меньше ошибок в решениях</h3>
+  <p class="m-bb" style="left:20px;top:2991px;width:374px;">Проверка помогает не менять привычки, планы или мнение из‑за громкого, но недоказанного заголовка.</p>
+
+  <div class="m-num" style="left:20px;top:3104px;">06/</div>
+  <!-- −1% межбуквенного, чтобы длинный заголовок встал в одну строку (как в мокапе) -->
+  <h3 class="m-bt" style="left:20px;top:3197px;width:340px;letter-spacing:-0.01em;">Сохранять доверие к науке</h3>
+  <p class="m-bb" style="left:20px;top:3257px;width:374px;">Неточный заголовок — не повод отрицать исследования. Это повод увидеть, что именно учёные действительно выяснили.</p>
+</section>
+
+<!-- 4. Стейтмент (мокап Desktop_1 - 443 @6088, y0=6088) -->
+<section class="m-sec m-statement">
+  <p class="m-st2" style="left:20px;top:373px;width:374px;">Если научный тезис может убедить,<br>он может и ввести<br>в заблуждение</p>
+</section>
+
+<!-- 5. Карточка 01 + пагинация (мокап Desktop_1 - 442, y0=6984).
+     Рамка с точками по углам — как на десктопе; «[Контекст]» — статичный
+     кадр тикера (интерактива в мобильной версии нет) -->
+<section class="m-sec m-card">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <rect x="30" y="110" width="353" height="645" stroke="#fc6030" fill="none" />
+    <circle cx="30" cy="110" r="10" fill="#fc6030" />
+    <circle cx="384" cy="110" r="10" fill="#fc6030" />
+    <circle cx="30" cy="755" r="10" fill="#fc6030" />
+    <circle cx="384" cy="755" r="10" fill="#fc6030" />
+  </svg>
+
+  <div class="m-card-num" style="left:52px;top:220px;">01</div>
+  <div class="m-tick" style="left:212px;top:258px;"><i>[</i><span>Контекст</span><i>]</i></div>
+  <h3 class="m-card-t" style="left:52px;top:451px;width:310px;">Навредить здоровью</h3>
+  <p class="m-card-p" style="left:52px;top:565px;width:310px;">Если человек поверит «научно доказанному» методу лечения, то это может привести к отказу от реальной медицины в пользу исследования из блога</p>
+
+  <span class="m-pg m-pg--on" style="left:168px;top:850px;"></span>
+  <span class="m-pg" style="left:190px;top:850px;"></span>
+  <span class="m-pg" style="left:212px;top:850px;"></span>
+  <span class="m-pg" style="left:234px;top:850px;"></span>
+</section>
+
+<!-- 6. «Учёные доказали: [X] меняет вашу жизнь» (мокап Desktop_1 - 441, y0=7880) -->
+<section class="m-sec m-sci">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <line x1="384" y1="450" x2="384" y2="644" stroke="#000" />
+    <line x1="20" y1="664" x2="364" y2="664" stroke="#000" />
+    <line x1="384" y1="684" x2="384" y2="742" stroke="#000" />
+    <circle cx="384" cy="664" r="10" fill="#000" />
+  </svg>
+
+  <h2 class="m-sci-h" style="left:20px;top:60px;width:374px;">«Учёные доказали:<br>[X] меняет вашу жизнь»</h2>
+  <p class="m-sci-b" style="left:20px;top:450px;width:364px;"><i>«Учёные доказали»</i> — самая убедительная фраза в интернете, и самая удобная для манипуляций.<br>
+  Мы верим исследованиям, экспертам и сложным словам, Но за научным аргументом может скрываться всё что угодно: несуществующая статья, маленькая выборка, вывод, которого учёные никогда не делали.</p>
+
+  <div class="m-tags" style="left:20px;top:684px;width:374px;">
+    <span class="m-pill">#учёные доказали</span><span class="m-pill">#вопросы</span>
+    <span class="m-pill">#исследование показало</span>
+  </div>
+</section>
+
+<!-- 7. Чек-лист, 5 пунктов (мокап Desktop_1 - 440 @8776, y0=8776) -->
+<section class="m-sec m-list">
+  <svg class="m-decor" viewBox="0 0 414 4500" aria-hidden="true">
+    <line x1="0" y1="40" x2="414" y2="40" stroke="#000" stroke-width="4" />
+    <line x1="0" y1="358" x2="414" y2="358" stroke="#000" stroke-width="4" />
+    <line x1="20" y1="1383.5" x2="358" y2="1383.5" stroke="#000" />
+    <line x1="391" y1="1369.5" x2="414.2" y2="1347.5" stroke="#000" />
+    <line x1="414" y1="1535.7" x2="382" y2="1402.5" stroke="#000" />
+    <line x1="13.1" y1="1963.5" x2="0" y2="1909" stroke="#000" />
+    <line x1="13.1" y1="2001.5" x2="0" y2="2056" stroke="#000" />
+    <line x1="38.1" y1="1982.5" x2="394.1" y2="1982.5" stroke="#000" />
+    <line x1="414.1" y1="2583.5" x2="400" y2="2642.5" stroke="#000" />
+    <line x1="414.3" y1="2739.5" x2="400" y2="2679.5" stroke="#000" />
+    <line x1="20" y1="2660.5" x2="376" y2="2660.5" stroke="#000" />
+    <line x1="13.1" y1="3323.5" x2="0" y2="3269" stroke="#000" />
+    <line x1="13.1" y1="3361.5" x2="0" y2="3416" stroke="#000" />
+    <line x1="38.1" y1="3342.5" x2="394.1" y2="3342.5" stroke="#000" />
+    <line x1="414.1" y1="3893.5" x2="400" y2="3952.5" stroke="#000" />
+    <line x1="414.3" y1="4049.5" x2="400" y2="3989.5" stroke="#000" />
+    <line x1="20" y1="3970.5" x2="376" y2="3970.5" stroke="#000" />
+    <circle cx="378" cy="1383.5" r="10" fill="#000" />
+    <circle cx="18.1" cy="1982.5" r="10" fill="#000" />
+    <circle cx="396" cy="2660.5" r="10" fill="#000" />
+    <circle cx="18.1" cy="3342.5" r="10" fill="#000" />
+    <circle cx="396" cy="3970.5" r="10" fill="#000" />
+  </svg>
+
+  <h2 class="m-cl-h2" style="left:20px;top:87px;width:374px;">Не верьте заголовку — изучайте</h2>
+  <div class="m-cltick" style="left:128px;top:258px;"><i>[</i><span>контекст</span><i>]</i></div>
+  <h2 class="m-cl-t" style="left:20px;top:396px;width:374px;">Чек-лист:<br>как читать громкие новости</h2>
+  <p class="m-cl-lead" style="left:20px;top:576px;width:374px;">Научный заголовок — не всегда научный факт. Используйте этот список, чтобы отделять реальные выводы исследований от преувеличений, рекламы и личных интерпретаций.</p>
+
+  <div class="m-widget mw-orange" style="left:20px;top:762px;">
+    <div class="m-widget-head"><span>{}</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Краткий чек-лист, который поможет оценить научный аргумент до того, как делать выводы</div>
+  </div>
+
+  <div class="m-widget mw-white" style="left:116px;top:974px;">
+    <div class="m-widget-head"><span>«»</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">На что обратить внимание, чтобы отличить обоснованный вывод от убедительно звучащего заявления</div>
+  </div>
+
+  <div class="m-num80" style="left:20px;top:1277px;">01</div>
+  <h3 class="m-item-h" style="left:20px;top:1431px;width:374px;">Смотрите на источник</h3>
+  <i class="m-quote" style="left:20px;top:1485px;">«</i>
+  <p class="m-item-q" style="left:63px;top:1494px;width:331px;">&nbsp;Где опубликовано исследование?<br>Есть ли ссылка на научную статью, автора или организацию?</p>
+  <p class="m-item-p" style="left:20px;top:1598px;width:374px;">Надёжная новость должна вести к конкретному источнику: статье, отчёту, данным исследования. Формулировка «британские учёные выяснили» <br>без имён, ссылок и деталей — не доказательство.</p>
+
+  <div class="m-num80" style="left:20px;top:1875px;">02</div>
+  <h3 class="m-item-h" style="left:20px;top:2030px;width:374px;">Проверяйте, кто проводил исследование</h3>
+  <i class="m-quote" style="left:20px;top:2113px;">«</i>
+  <p class="m-item-q" style="left:63px;top:2122px;width:331px;">Кто авторы работы? <br>В какой области они специализируются? <br>Есть ли у них или у заказчика исследования финансовая заинтересованность?</p>
+  <p class="m-item-p" style="left:20px;top:2301px;width:374px;">Учёные — не единая группа с общим мнением. Важно понимать, кто сделал вывод, в какой области он специализируется и нет ли у него финансового интереса в результате.</p>
+
+  <div class="m-num80" style="left:20px;top:2553px;">03</div>
+  <h3 class="m-item-h" style="left:20px;top:2708px;width:374px;">Уточняйте масштаб<br>и условия исследования</h3>
+  <i class="m-quote" style="left:20px;top:2819px;">«</i>
+  <p class="m-item-q" style="left:63px;top:2828px;width:331px;">Сколько участников было в исследовании?<br>Кого именно изучали: людей, животных, клетки? Можно ли перенести вывод на всех?</p>
+  <p class="m-item-p" style="left:20px;top:2983px;width:374px;">Выводы маленького эксперимента или работы на животных могут быть перспективными, но ещё не означают, что эффект подтверждён для большинства людей.</p>
+
+  <div class="m-num80" style="left:20px;top:3235px;">04</div>
+  <h3 class="m-item-h" style="left:20px;top:3390px;width:374px;">Проверяйте дату<br>и контекст</h3>
+  <i class="m-quote" style="left:20px;top:3472px;">«</i>
+  <p class="m-item-q" style="left:63px;top:3481px;width:331px;">Когда опубликована работа?<br>Не опровергли ли её более поздние данные?<br>Не вырван ли вывод из контекста?</p>
+  <p class="m-item-p" style="left:20px;top:3611px;width:374px;">Наука развивается: старые выводы могут уточняться или пересматриваться. Кроме того, заголовок часто упрощает исследование и не рассказывает об ограничениях, условиях и исключениях.</p>
+
+  <div class="m-num80" style="left:20px;top:3863px;">05</div>
+  <h3 class="m-item-h" style="left:20px;top:4018px;width:374px;">Обращайте внимание<br>на формулировки</h3>
+  <i class="m-quote" style="left:20px;top:4111px;">«</i>
+  <p class="m-item-q" style="left:63px;top:4120px;width:331px;">В статье сказано «связано с», «может влиять» или «точно вызывает»?<br>Не стал ли заголовок категоричнее самого исследования?</p>
+  <p class="m-item-p" style="left:20px;top:4249px;width:374px;">Научный язык обычно осторожен: «предполагается», «обнаружена связь», «требуются дополнительные данные». Если в новости всё «точно лечит», «гарантированно вызывает» или «окончательно доказано», это повод перепроверить материал.</p>
+</section>
+
+<!-- 8. «Вывод» (мокап Desktop_1 - 443 @13276, y0=13276) -->
+<section class="m-sec m-concl">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <rect x="30" y="346" width="354" height="287" stroke="#fff" fill="none" />
+    <circle cx="30" cy="346" r="10" fill="#fff" />
+    <circle cx="384" cy="346" r="10" fill="#fff" />
+    <circle cx="30" cy="633" r="10" fill="#fff" />
+    <circle cx="384" cy="633" r="10" fill="#fff" />
+  </svg>
+
+  <div class="m-concl-h" style="left:87px;top:47px;width:240px;">Вывод</div>
+
+  <div class="m-pill-lg mp-ow" style="left:20px;top:190px;">#эксперты выяснили</div>
+  <div class="m-pill-lg mp-wo" style="left:210px;top:287px;">#научный аргумент</div>
+  <div class="m-pill-lg mp-ow" style="left:0;top:370px;">#учёные доказали</div>
+  <p class="m-concl-t" style="left:20px;top:432px;width:374px;">Оценивайте доказательства, <br>а не громкость заявления</p>
+  <div class="m-pill-lg mp-wo" style="left:307px;top:590px;">#проверка</div>
+  <div class="m-pill-lg mp-ow" style="left:20px;top:712px;">#исследование показало</div>
+  <div class="m-pill-lg mp-wo" style="left:239px;top:809px;">#первоисточник</div>
+</section>
+
+<!-- 9. «Наука стала декорацией» (мокап Desktop_1 - 445, y0=14172) -->
+<section class="m-sec m-decor-sec">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <line x1="20" y1="498" x2="367" y2="498" stroke="#fff" />
+    <line x1="414.1" y1="467" x2="399.4" y2="482.4" stroke="#fff" />
+    <line x1="414.1" y1="569.5" x2="394.5" y2="516.2" stroke="#fff" />
+    <line x1="39.3" y1="774.5" x2="394.3" y2="774.5" stroke="#fff" />
+    <line x1="0" y1="807" x2="5.8" y2="789.3" stroke="#fff" />
+    <line x1="11.8" y1="756.7" x2="0.1" y2="725" stroke="#fff" />
+    <circle cx="387" cy="498" r="10" fill="#fff" />
+    <circle cx="19.3" cy="774.5" r="10" fill="#fff" />
+  </svg>
+
+  <h2 class="m-dc-h" style="left:20px;top:70px;width:374px;">Наука стала декорацией</h2>
+  <p class="m-lead20" style="left:20px;top:198px;width:340px;color:var(--white);">Когда-то слово «наука» требовало доказательств.<br>Сегодня оно их заменяет.</p>
+
+  <p class="m-body16" style="left:20px;top:403px;width:374px;color:var(--white);">«Учёные доказали» — и критическое мышление отключается: спорить с наукой неудобно, а проверять некогда. Этим зазором между доверием и проверкой пользуются все, кому нужно убедить.</p>
+
+  <div class="m-tags" style="left:20px;top:513px;width:374px;">
+    <span class="m-pill">#учёные доказали</span>
+  </div>
+
+  <p class="m-body16" style="left:20px;top:700px;width:374px;color:var(--white);">Итог — информационная среда, где факт и манипуляция звучат одинаково убедительно. Проигрывает тот, кто не задал ни одного вопроса.</p>
+
+  <div class="m-tags" style="left:316px;top:790px;width:98px;">
+    <span class="m-pill">#вопросы</span>
+  </div>
+</section>
+
+<!-- 10. Финал: «…в виде сервиса» (мокап Desktop_1 - 444, y0=15068) -->
+<section class="m-sec m-finale">
+  <svg class="m-decor" viewBox="0 0 414 896" aria-hidden="true">
+    <line x1="20" y1="177" x2="364" y2="177" stroke="#000" />
+    <line x1="383.5" y1="156.9" x2="414.2" y2="60.5" stroke="#000" />
+    <line x1="36" y1="687" x2="374" y2="193" stroke="#000" />
+    <line x1="50" y1="708" x2="394" y2="708" stroke="#000" />
+    <line x1="30" y1="728" x2="30" y2="783" stroke="#000" />
+    <circle cx="384" cy="177" r="10" fill="#000" />
+    <circle cx="30" cy="708" r="10" fill="#000" />
+    <line x1="20" y1="800" x2="394" y2="800" stroke="#fc6030" stroke-width="2" />
+    <line x1="20" y1="870" x2="394" y2="870" stroke="#fc6030" stroke-width="2" />
+  </svg>
+
+  <h2 class="m-fin-h" style="left:20px;top:30px;width:374px;">именно поэтому появляется решение</h2>
+
+  <div class="m-widget mw-orange mw-sm" style="left:20px;top:196px;">
+    <div class="m-widget-head"><span>{}</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Сервис фактчекинга на базе ИИ <br>и скоринга достоверности.</div>
+  </div>
+
+  <div class="m-widget mw-gray mw-sm" style="left:116px;top:317px;">
+    <div class="m-widget-head"><span>##</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Сервис анализирует первоисточники, исследования, методологию и соответствие выводов исходным данным.</div>
+  </div>
+
+  <div class="m-widget mw-white mw-sm" style="left:20px;top:474px;">
+    <div class="m-widget-head"><span>«»</span><svg class="m-wx" width="11" height="11" viewBox="0 0 11 11"><path d="M1 1 L10 10 M10 1 L1 10" stroke="currentColor" stroke-width="1"/></svg></div>
+    <div class="m-widget-note">Он проверяет громкие новости/утверждения, и помогает отличить подтверждённые факты от преувеличений/манипуляций/фейков.</div>
+  </div>
+
+  <p class="m-fin-r" style="left:20px;top:726px;width:374px;">в виде сервиса</p>
+
+  <!-- статичный кадр тикера [Контекст] между оранжевыми линейками -->
+  <div class="m-tick m-tick-lg" style="left:20px;top:802px;"><i>[</i><span>Контекст</span><i>]</i></div>
+</section>
+
+</div>
+</div>
+<script src="js/mobile.js"></script>
+</body>
+</html>

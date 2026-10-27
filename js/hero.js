@@ -97,6 +97,15 @@
   // линейный подъём 0..1 на отрезке [a,b] — чтобы не копировать clamp везде
   function ramp(p, a, b) { return Math.max(0, Math.min(1, (p - a) / (b - a))); }
 
+  // маска растворения фразы в fallback-ветке: полоса 60px стоит влево от левой
+  // кромки шарика (322.16px) — позиция в локальных координатах текста = -263.84 - tx,
+  // те же числа, что в @keyframes stTextMask (текст виден только правее полосы)
+  function textMask(tx) {
+    const m = (-263.84 - tx).toFixed(2) + 'px 0';
+    textEl.style.webkitMaskPosition = m;
+    textEl.style.maskPosition = m;
+  }
+
   function applyProgress() {
     const s = scale();
     const start = stTopS();
@@ -105,9 +114,9 @@
     // Фазы (в долях PIN=2700; длины фаз в px сохранены от прежней версии):
     // подход 0–521.6 (шарик и текст съезжаются до первого касания),
     // расщепление 521.6–575.6, прилёт осколков 756, пары 810–1710,
-    // текст растворяется на кромке окружности 1516–1576,
-    // вопрос 1656–1728, финал: вопрос держится до 1890, исчезает к 2052,
-    // спицы 1944–2322
+    // текст улетает влево и растворяется на маске влево от левой кромки
+    // шарика (буквы исчезают, уходя левее шарика), вопрос 1656–1728,
+    // финал: вопрос держится до 1890, исчезает к 2052, спицы 1944–2322
     if (p <= P1) {
       const k = p / P1;
       dotMain.style.transform = 'translateX(' + (-370 + 222.16 * k) + 'px)';
@@ -119,6 +128,7 @@
       p2.style.opacity = '0';
       p1.style.transform = 'translate(0,0)';
       p2.style.transform = 'translate(0,0)';
+      textMask(654 - 836.47 * k);
     } else if (p <= P2) {
       // окно расщепления (54px): шарик замер в точке контакта и гаснет,
       // на его месте проявляются осколки — линейно, как в CSS-таймлайне
@@ -132,19 +142,23 @@
       p2.style.opacity = o;
       p1.style.transform = 'translate(0,0)';
       p2.style.transform = 'translate(0,0)';
+      textMask(TEXT_TX);
     } else {
       // осколки летят до окружности (210° и 150°): прилёт на p=0.28 (756px)
       const k = ramp(p, P2, 0.28);
-      textEl.style.transform = 'translateX(' + (TEXT_TX - 1471.53 * ramp(p, P2, 0.6667)) + 'px)';
-      // текст растворяется, когда его правый край пересёк левую кромку
-      // окружности (tx = -1313.31 → p=0.5617), не доезжая до края экрана
-      textEl.style.opacity = String(1 - ramp(p, 0.5617, 0.5839));
+      const tx = TEXT_TX - 1471.53 * ramp(p, P2, 0.6667);
+      textEl.style.transform = 'translateX(' + tx + 'px)';
+      // буквы растворяются на маске влево от левой кромки шарика (322.16px),
+      // как в CSS-таймлайне: позиция маски = -263.84 - tx; opacity больше не
+      // участвует — правый край текста скрывается маской на tx=-1331.84
+      textEl.style.opacity = '1';
       dotMain.style.transform = 'translateX(' + DOT_TX + 'px)';
       dotMain.style.opacity = '0';
       p1.style.opacity = '1';
       p2.style.opacity = '1';
       p1.style.transform = 'translate(' + (47.94 * k) + 'px,' + (-151.34 * k) + 'px)';
       p2.style.transform = 'translate(' + (47.94 * k) + 'px,' + (147.97 * k) + 'px)';
+      textMask(tx);
     }
 
     if (pairSteps) {

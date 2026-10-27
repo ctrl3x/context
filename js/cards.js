@@ -19,21 +19,31 @@
   // дробная копейка от scale() ломала границы зоны (y < ze давало true на границе)
   function topOf(el) { return Math.round(el.getBoundingClientRect().top + window.scrollY); }
   function zoneStart() { return topOf(cards[0]); }
-  // зона карточек заканчивается на первом пикселе секции учёных (обёртка
-  // .sci-pin): с неё скролл нативный. Меряем ОБЁРТКУ, не секцию:
-  // sec-scientists несёт transform fade-анимации (после сброса класса её нет,
-  // но до сброса rect.top поймал бы приколотое к вьюпорту положение —
-  // ze «плавал» бы вместе со скроллом, как меряют обёртки hero.js/teardown.js)
+  // верх зоны перехода на учёных (обёртка .sci-pin) = низ карточки 04:
+  // зона кроссфейда — [cardTop 04, zoneEnd], порог — её середина. Меряем
+  // ОБЁРТКУ, не секцию: sec-scientists прячется классами sci-on (после
+  // снятия visibility нет, но до снятия rect.top поймал бы приколотое к
+  // вьюпорту положение — ze «плавал» бы вместе со скроллом, как меряют
+  // обёртки hero.js/teardown.js)
   function zoneEnd() { return topOf(sciPin); }
   // верх карточки 04 независимо от её трансформов: карточку двигают ленты,
   // topOf секции во время ленты даёт сам scrollY. Обёртка .cards-pin не
-  // трансформится никогда: меряем её и прибавляем шаг 04
-  function cardTop() { return topOf(pinWrap) + LAST * ZH * scale(); }
+  // трансформится никогда: меряем её и прибавляем шаг 04. Округление —
+  // ОБЯЗАТЕЛЬНО и тем же способом, что и у позиции отдыха: страница стоит
+  // на карточке в topOf(cards[LAST]) = Math.round(той же дробной величины),
+  // дробная cardTop() была бы больше позиции отдыха на копейку — и колесо
+  // вниз уходило бы в ветку карточек (goForward с idx === LAST молчал),
+  // страница «залипала» на 04 при дробном scale
+  function cardTop() { return Math.round(topOf(pinWrap) + LAST * ZH * scale()); }
 
   // фиксированная рука-лупа: прижата к вьюпорту, пока экран стоит ровно
   // на карточке; при нативном скролле между карточками — отпускается
-  // и уезжает вместе со страницей
+  // и уезжает вместе со страницей. На карточке 04 (и в зоне перехода
+  // под ней) рука едет вместе с приклеенной карточкой: к ступеньке
+  // добавляется её сдвиг dy4 (его считает fadePin, поэтому в scroll-
+  // хендлере fadePin вызывается раньше photoPin)
   const ZH = 832; // высота экрана в макете
+  let dy4 = 0;    // текущий сдвиг приклейки карточки 04 (layout-px)
   function photoPin() {
     if (!photo) return;
     const s = scale();
@@ -44,60 +54,86 @@
     // «ступенька»: ближайшая карточка. Math.round, а не floor:
     // границы дробные (scale), и пыль 0.001px у границы 832.0 сбрасывала
     // ступень на предыдущую карточку — рука пропадала на 02/03
-    let stick = Math.max(0, Math.min(Math.round(rel / ZH), LAST)) * ZH;
-    // во время fade-перехода рука приколота вместе с карточкой 04: белый
-    // экран проявляется поверх, и она не должна уезжать со страницей
-    if (fading) stick = LAST * ZH;
+    const step = Math.max(0, Math.min(Math.round(rel / ZH), LAST));
+    const stick = step * ZH + (step === LAST ? dy4 : 0);
     const active = y + ZH > zs && y < ze;
     pinWrap.classList.toggle('on-stage', active);
     photo.style.transform = 'translateY(' + stick + 'px)';
   }
 
-  // ── fade-переход 04 → «Учёные доказали» ─────────────────────────────
-  // Дискретный (как ленты): один жест = одно переключение, скролл прогрессом
-  // не рулит. Вниз с карточки 04 — белый экран проявляется поверх (карточка
-  // стоит в потоке), в конце мгновенный скролл на верх .sci-pin и сброс
-  // класса. Вверх с «Учёные доказали» — наоборот: мгновенный скролл на
-  // карточку 04 (экран ещё накрыт классом), затем экран растворяется
-  let fading = false;
+  // ── переход 04 → «Учёные доказали»: триггер по скроллу ────────────────
+  // Зона перехода — [cardTop 04, cardTop 04 + 832·scale] (ровно один экран
+  // скролла), порог — её середина: cardTop 04 + 416·scale. Скролл проходит
+  // зону свободно (нативно), пересечение порога в любую сторону играет
+  // кроссфейд фиксированные 620 мс — скоростью скролла управлять нельзя.
+  // Работает отовсюду: жесты wheel, стрелки, скроллбар, инерция тачпада.
+  //
+  // Всю зону оба экрана приклеены к вьюпорту: карточку 04 удерживает
+  // translateY(+dy) (fadePin: поток уносит её вверх, сдвиг возвращает на
+  // место), экран учёных на встречном ходе держит кламп −832 в scrub
+  // js/scientists.js (его transform −832…0 накрывает вьюпорт, пока зона
+  // не пройдена). К концу зоны карточка стоит приколотой ровно ЗА
+  // непрозрачным экраном учёных — дальше она может «зависнуть» в приклейке
+  // незаметно, поэтому кламп сверху не требует сброса. Число FADE держать
+  // синхронным с js/scientists.js (FADE там) и комментарием к .sci-pin.
+  const FADE = 832; // длина зоны перехода в px макета
+  let flight = false; // идёт инерционный пролёт снизу вверх (см. catchFlight)
+
+  let sciTh = Infinity; // порог состояния: середина зоны, px скролла
+
+  function sciPlaying() { return next.classList.contains('sci-anim-in') || next.classList.contains('sci-anim-out'); }
+
+  // пересчёт порога (дробный scale) + состояние из скролла без анимации:
+  // вход на страницу, пересчёт layout, финал анимации
+  function syncSci() {
+    sciTh = cardTop() + FADE * scale() * 0.5;
+    sciPin.classList.toggle('sci-on', window.scrollY >= sciTh);
+  }
+
+  // приклейка карточки 04: пока вьюпорт проезжает зону [cardTop, cardTop+832],
+  // карточку удерживает на месте translateY(+dy); вне зоны dy = 0 — в потоке.
+  // Снизу зона сшита с потоком непрерывно (dy растёт из нуля); сверху —
+  // карточка уже закрыта непрозрачным экраном учёных, скачков не видно
+  function fadePin() {
+    const s = scale();
+    const y = window.scrollY;
+    dy4 = Math.min(Math.max((y - cardTop()) / s, 0), FADE);
+    cards[LAST].style.transform = dy4 > 0.01 ? 'translateY(' + dy4 + 'px)' : '';
+  }
 
   function sciForward() {
-    if (fading) return;
-    fading = true;
-    pinWrap.classList.add('on-stage'); // рука видна всю анимацию
-    next.classList.add('sci-fade-in');
+    if (sciPlaying()) return;
+    sciPin.classList.add('sci-on');      // секция видима всю анимацию
+    next.classList.add('sci-anim-in');
     setTimeout(function () {
-      // к этому моменту экран непрозрачен и висит на -832 (компенсация
-      // собственного положения в потоке) — визуально он ровно на вьюпорте:
-      // мгновенный скролл на верх .sci-pin ничего не двигает, класс сброс
-      window.scrollTo(0, topOf(sciPin));
-      next.classList.remove('sci-fade-in');
-      fading = false;
-      // гасим хвост инерции: колёса сразу после перехода не запускают
-      // следующий (как после лент)
-      last = performance.now();
+      next.classList.remove('sci-anim-in');
+      syncSci();
+      sciTick(); // скролл мог уйти за порог обратно во время анимации — доигрываем
     }, DUR + 30);
   }
 
   function sciBack() {
-    if (fading) return;
-    fading = true;
-    pinWrap.classList.add('on-stage');
-    // экран ещё лежит в потоке на верхе .sci-pin — визуально на вьюпорте.
-    // Класс накрывает его с -832 (тот же кадр) и растворяет: мгновенный
-    // скролл обратно на карточку 04 проходит незаметно
-    next.classList.add('sci-fade-out');
-    next.getBoundingClientRect(); // фиксируем стартовый кадр до скролла
-    window.scrollTo(0, cardTop());
+    if (sciPlaying()) return;
+    next.classList.add('sci-anim-out');  // .sci-on ещё держит секцию видимой
     setTimeout(function () {
-      next.classList.remove('sci-fade-out');
-      fading = false;
-      last = performance.now();
+      next.classList.remove('sci-anim-out');
+      syncSci();                         // снимает .sci-on — экран скрыт
+      sciTick();
     }, DUR + 30);
   }
 
-  window.addEventListener('scroll', function () { photoPin(); }, { passive: true });
-  window.addEventListener('resize', function () { photoPin(); });
+  // тик состояния: пересечение порога в любую сторону — сыграть кроссфейд.
+  // Во время анимации и пролёта (flight) состояние не трогаем: финал
+  // анимации и catchFlight выставят его по фактическому скроллу
+  function sciTick() {
+    if (!Number.isFinite(sciTh) || sciPlaying() || flight) return;
+    const want = window.scrollY >= sciTh;
+    if (want === sciPin.classList.contains('sci-on')) return;
+    want ? sciForward() : sciBack();
+  }
+
+  window.addEventListener('scroll', function () { fadePin(); photoPin(); sciTick(); }, { passive: true });
+  window.addEventListener('resize', function () { fadePin(); photoPin(); sciTick(); });
 
   // лента: A уезжает влево/вправо, B въезжает с противоположной стороны,
   // в конце мгновенный скролл на targetY и сброс трансформов
@@ -175,23 +211,29 @@
   // инерции продолжает двигать страницу (и растит паузы между wheel-тами),
   // поэтому «новый жест» по паузам он обманывает, а признак покоя — нет
   let lastScrollAt = 0;
+  let lastScrollY = window.scrollY;
   function noteScroll() { lastScrollAt = performance.now(); }
 
   // ловушка пролёта: свайп вверх с нижних экранов нативно проносит страницу
-  // сквозь экран учёных к карточкам. Ловим момент, когда пролёт ПЕРЕСЁК
-  // верх экрана (y стал меньше topOf(sciPin)) — snap обратно на экран.
-  // Пока пролёт едет снизу (y > top), не мешаем: обычный нативный скролл
-  // снизу вверх должен проходить все нижние экраны как обычно
+  // сквозь зону перехода и экран учёных к карточкам. Ловим момент, когда
+  // пролёт ПЕРЕСЁК порог состояния (y стал меньше sciTh) — snap обратно на
+  // порог: страница останавливается на экране «Учёные доказали» (состояние
+  // не менялось — кроссфейд не дёргается), дальше наверх пользователь
+  // уходит уже осознанным жестом через честный fade. Пока пролёт едет
+  // снизу (y > порога), не мешаем: нативный скролл
   function catchFlight() {
     if (!flight) return;
-    const top = topOf(sciPin);
-    if (window.scrollY >= top) return;
-    window.scrollTo(0, top);
+    if (window.scrollY >= sciTh) return;
+    window.scrollTo(0, sciTh);
     flight = false;
   }
 
   window.addEventListener('scroll', function () {
     noteScroll();
+    // пролёт ловится только на ходу вверх; любое движение вниз или остановка
+    // ниже порога сбрасывают флаг — иначе sciTick навсегда заблокирован
+    if (window.scrollY > lastScrollY) flight = false;
+    lastScrollY = window.scrollY;
     catchFlight();
   }, { passive: true });
   function syncIdx() {
@@ -203,25 +245,33 @@
     idx = s;
   }
 
+  // стартовое состояние без прокрутки: .sci-gate включает JS-режим
+  // (секция учёных скрыта, состояниями рулит sciTick), hashJump выставляет
+  // честное начальное состояние по скроллу
+  function sciInit() {
+    sciPin.classList.add('sci-gate');
+    syncSci();
+  }
+  sciInit();
+
   window.addEventListener('wheel', function (e) {
-    if (sliding || fading) { e.preventDefault(); return; }
+    if (sliding) { e.preventDefault(); return; }
     noteWheel();
     const y = window.scrollY;
     const zs = zoneStart();
     const ze = zoneEnd();
 
     if (e.deltaY > 0) {
-      // выше зоны (в т.ч. «Если научный тезис…») и ниже неё — нативный скролл:
-      // экран стейтмента — обычная секция над карточкой 01, секции после
-      // «Учёные доказали» — после её верха
-      if (y < zs || y >= ze) return;
+      // выше зоны (в т.ч. «Если научный тезис…») и от карточки 04 вниз —
+      // нативный скролл: экран стейтмента — обычная секция над карточкой 01,
+      // зона перехода на «Учёные доказали» и секции после неё — нативные
+      // (порог внутри зоны ловит sciTick, экран учёных доклеивает scrub
+      // js/scientists.js). Допуск 4px к cardTop: дробный scale даёт
+      // копеечную пыль между cardTop() и позицией отдыха на карточке —
+      // она не должна уводить колесо в ветку карточек (там goForward с
+      // idx === LAST молчал, и с 04 дальше не шли)
+      if (y < zs || y >= cardTop() - 4) return;
       syncIdx();
-      // с карточки 04 вниз — fade-переход на «Учёные доказали»
-      if (idx >= LAST) {
-        e.preventDefault();
-        if (gate(e)) sciForward();
-        return;
-      }
       const top = topOf(cards[idx]);
       // стоим не на верхней границе карточки — сначала добиваем до неё
       if (y > top + 4) { e.preventDefault(); window.scrollTo(0, top); return; }
@@ -229,24 +279,13 @@
       if (!gate(e)) return;
       goForward();
     } else {
-      const t4 = cardTop();
-      // ниже экрана учёных — нативный скролл (вся нижняя часть страницы);
-      // инерцию такого проезда наверх ловит catchFlight на верхе экрана
+      // ниже фейд-зоны — нативный скролл (вся нижняя часть страницы);
+      // инерцию такого проезда наверх ловит catchFlight на пороге зоны
       if (y > ze) { flight = true; return; }
-      if (y > t4 + 4) {
-        // экран учёных в кадре (или щель между ним и карточкой 04): щель
-        // дотягиваем до верха экрана — инерционный проезд из-под низа
-        // останавливается здесь, а не проскакивает к карточкам. Сам fade
-        // на 04 — только когда страница РЕАЛЬНО остановилась (признак
-        // покоя, как у ленты вверх): инерционные паузы между колёсами
-        // бывают > 120 мс и обманывают used, а хвост инерции, дотащивший
-        // страницу из-под низа, не должен сразу же уводить её на 04
-        e.preventDefault();
-        const rest = performance.now() - lastScrollAt > 150;
-        if (y < ze || used || !rest) { used = true; window.scrollTo(0, ze); return; }
-        if (gate(e)) { used = true; sciBack(); }
-        return;
-      }
+      // в зоне перехода — нативный скролл: sciTick ловит порог сам, сам
+      // пролёт инерции догоняет catchFlight. Допуск 4px — зеркально ветке
+      // вниз: копеечная пыль дробного scale не уводит колесо в карточки
+      if (y > cardTop() - 4) return;
       if (y < zs - 4) return;
       syncIdx();
       const top = topOf(cards[idx]);
@@ -269,7 +308,7 @@
   }, { passive: false });
 
   window.addEventListener('keydown', function (e) {
-    if (sliding || fading) { e.preventDefault(); return; }
+    if (sliding) { e.preventDefault(); return; }
     const fwd = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
     const back = e.key === 'ArrowUp' || e.key === 'PageUp';
     if (!fwd && !back) return;
@@ -278,28 +317,22 @@
     const ze = zoneEnd();
 
     if (fwd) {
-      if (y < zs || y >= ze) return;
+      // от карточки 04 вниз — нативный скролл (sciTick ловит порог зоны
+      // перехода сам, экран учёных доклеивает scrub js/scientists.js).
+      // Допуск 4px к cardTop — как у wheel: дробный scale не «глотает»
+      // клавиши в состоянии «карточка 04»
+      if (y < zs || y >= cardTop() - 4) return;
       syncIdx();
-      // с карточки 04 вниз — fade-переход на «Учёные доказали»
-      if (idx >= LAST) {
-        e.preventDefault();
-        sciForward();
-        return;
-      }
       const top = topOf(cards[idx]);
       if (y > top + 4) { e.preventDefault(); window.scrollTo(0, top); return; }
       e.preventDefault();
       goForward();
     } else {
-      // ниже экрана учёных — нативный скролл (вся нижняя часть страницы)
-      if (y > ze) return;
-      // экран учёных в кадре — fade-переход обратно на карточку 04
-      if (y > cardTop() + 4) {
-        e.preventDefault();
-        sciBack();
-        return;
-      }
-      if (y < zs - 4 || y >= ze) return;
+      // ниже фейд-зоны и в самой зоне — нативный скролл вверх (sciTick
+      // ловит порог сам, инерцию догоняет catchFlight). Допуск 4px —
+      // зеркально ветке вниз
+      if (y > cardTop() - 4) return;
+      if (y < zs - 4) return;
       syncIdx();
       const top = topOf(cards[idx]);
       // карточка не полностью на экране — сначала добиваем до верхней границы,
@@ -312,29 +345,37 @@
     }
   });
 
-  // превью состояния без прокрутки: #card-step1 .. #card-step4
+  // превью состояния без прокрутки: #card-step1 .. #card-step4,
+  // #sci-step1 — экран «Учёные доказали» (панельное состояние)
   // прыжок повторяется и по load: в момент парсинга скрипта картинки выше
   // ещё не загрузились, layout «не дотягивает» — первый скролл уходит не туда
   function hashJump() {
+    syncSci(); // порог считаем ДО прыжка: sci-step1 прыгает ровно на него
     const m = location.hash.match(/^#card-step([1-4])$/);
     if (m) {
       idx = +m[1] - 1;
       window.scrollTo(0, topOf(cards[idx]));
     }
-    // превью экрана «Учёные доказали»: #sci-step1 — экран в кадре
+    // превью экрана «Учёные доказали»: #sci-step1 — порог состояния
+    // (середина зоны перехода, экран уже показан); подскролл ниже —
+    // хвост пина с растяжкой маски (#sci-step2 ведёт js/scientists.js)
     const ms = location.hash.match(/^#sci-step1$/);
-    if (ms) window.scrollTo(0, topOf(sciPin));
+    if (ms) window.scrollTo(0, Math.round(sciTh));
+    fadePin();
+    photoPin();
+    sciTick();
   }
   hashJump();
   // web-шрифты (display=swap) меняют метрики текста уже ПОСЛЕ load: документ
   // растёт, границы зон уезжают, а событие scroll не приходит (scrollY не
   // менялся) — пины остаются с устаревшими трансформами. Пересчитываем прыжок
-  // и пин руки после load и после готовности шрифтов
+  // и пины руки/карточки 04 после load и после готовности шрифтов
   function settle() {
     hashJump();
-    photoPin();
   }
   window.addEventListener('load', settle);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(settle);
+  syncSci();
+  fadePin();
   photoPin();
 })();

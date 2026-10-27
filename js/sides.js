@@ -29,5 +29,9 @@
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule);
   window.addEventListener('load', schedule);
+  // разворот маски (js/scientists.js) переключает .sciexp-dark посреди
+  // фиксированного твина — скролл к этому моменту может уже стоять, и
+  // scroll-события больше не приходят; твин сообщает о переключении сам
+  window.addEventListener('sciexp', schedule);
   update();
 })();

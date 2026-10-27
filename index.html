@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Как медиа искажают исследования</title>
+<!-- Мобильная версия живёт отдельной страницей (mobile.html, мокап 414px):
+     на узких экранах сразу заменяем URL. Проверка только при загрузке,
+     «переключения на лету» нет — обратный редирект лежит в mobile.html. -->
+<script>
+if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
+  location.replace('mobile.html');
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Arsenal:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -290,13 +298,17 @@
 </section>
 </div>
 
-<!-- 7. УЧЁНЫЕ ДОКАЗАЛИ (fade-переход с карточки 04: жест вниз — экран
-     проявляется поверх карточки, жест вверх — растворяется; запуск —
-     js/cards.js, CSS-классы .sci-fade-in/.sci-fade-out). Хвост пина —
-     отдельный экран (Figma 1836:934): скролл растягивает sci-mask из панели
-     на весь экран, дефолт фонарика доезжает в центр (326;416); секцию на
-     это время держит ручной пин transform'ом (js/scientists.js, паттерн
-     no-tl ветки teardown.js — sticky не цепляется к окну при скролле на body) -->
+<!-- 7. УЧЁНЫЕ ДОКАЗАЛИ (переход с карточки 04 — триггер по скроллу: порог
+     в середине зоны [cardTop 04, cardTop 04 + 832·scale], любой скролл
+     через порог играет кроссфейд 620 мс — запуск js/cards.js, классы
+     .sci-on/.sci-anim-in/.sci-anim-out; вся зона оба экрана приколоты).
+     Хвост пина — отдельный экран (Figma 1836:934): скролл только
+     ПЕРЕКЛЮЧАЕТ состояние разворота sci-mask из панели на весь экран
+     (порог — середина зоны ниже экрана, ловит любой скролл), сам
+     разворот играет фиксированные 620 мс, дефолт фонарика доезжает в
+     центр (326;416); секцию на это время держит ручной пин transform'ом
+     (js/scientists.js, паттерн no-tl ветки teardown.js — sticky не цепляется
+     к окну при скролле на body) -->
 <div class="sci-pin">
 <section class="sec sec-white sec-scientists">
   <h2 class="sci-title">«Учёные доказали:<br>[X] меняет вашу жизнь»</h2>
@@ -519,7 +531,8 @@
   <span class="cl-ball" aria-hidden="true"></span>
 </section>
 
-<!-- 12. FINALE -->
+<!-- 12. FINALE: обёртка .fin-pin — пин хвоста, высоту добирает js/decor.js -->
+<div class="fin-pin">
 <section class="sec sec-finale">
   <p class="h40 fin-lead caps">именно поэтому появляется решение</p>
 
@@ -553,6 +566,7 @@
        на стыке с тёмным экраном шарик «меняет цвет» с белого на чёрный -->
   <span class="cl-ball" aria-hidden="true"></span>
 </section>
+</div>
 
 </div>
 </div>

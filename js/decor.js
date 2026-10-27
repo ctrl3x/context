@@ -25,14 +25,27 @@
   // хребта у стыка и разгорается — прозрачности меняются в противофазе
   // и в сумме дают ровно 1 (белый = (832−b)/150, чёрный = (b−682)/150),
   // поэтому визуально это один шарик, перекрашивающийся на границе.
-  // Скорости хребтов РАЗНЫЕ (см. K ниже): чёрному нужно успеть проехать
-  // свой хребет до конца страницы.
+  //
+  // ХВОСТ ФИНАЛА — пин. После стыка хребет финала продолжает ехать на тех
+  // же 2/3, но странице структурно хватает только на 2H − vh скролла
+  // (два экрана по 832 минус запас вьюпорта), а хребту на этой скорости
+  // нужно HANDOFF_D + FH/SLOPE = 1238. Раньше скорость чёрного шарика
+  // подгонялась под фактический запас (K ≈ 1.2–1.3 при vh 800–832) — на
+  // стыке шарик резко прибавлял и на экране ехал вниз вместо дрейфа
+  // вверх. Теперь недостающий скролл добирает пин: его длину
+  // PIN = HANDOFF_D + FH/SLOPE − (2H − vh) js выставляет высотой обёртки
+  // .fin-pin (syncPin ниже); пока экран приколот transform'ом (как
+  // td-pin/sci-pin, sticky нельзя), шарик спускается по хребту на стоячем
+  // экране и растворяется на последних FADE px ровно к последнему px
+  // скролла. Без JS обёртка остаётся высотой 832 (пина нет), svg виден
+  // целиком — фолбэк статикой, как и у остальных катыши.
   const secDecor = document.querySelector('.sec-decor');
   const secFinale = document.querySelector('.sec-finale');
   const svgDecor = secDecor && secDecor.querySelector('.lines-svg');
   const ballDecor = secDecor && secDecor.querySelector('.cl-ball');
   const svgFinale = secFinale && secFinale.querySelector('.lines-svg');
   const ballFinale = secFinale && secFinale.querySelector('.cl-ball');
+  const wrapFinale = secFinale ? secFinale.parentElement : null; // .fin-pin
   const pageInner = document.getElementById('page-inner');
   if (!secDecor || !svgDecor || !ballDecor || !secFinale || !svgFinale || !ballFinale || !pageInner) return;
 
@@ -47,12 +60,14 @@
   // его нижней кромки: (d + H)·SLOPE = H → d = 416. В этот момент кромка
   // на середине вьюпорта (832 − 416), стык ровно в кадре.
   const HANDOFF_D = H / SLOPE - H;
-  // Скорость финального хребта — НЕ константа: после стыка шарик должен
-  // успеть проехать все FH = 548px хребта и раствориться РОВНО К КОНЦУ
-  // СТРАНИЦЫ. Запас скролла после стыка зависит от высоты вьюпорта
-  // (scale.js вписывает экран 832px в высоту с запасом — вьюпорт обычно
-  // ВЫШЕ одного экрана, и страница кончается раньше, чем через 832 −
-  // HANDOFF_D px), поэтому меряем его по факту в update() — см. K там.
+  // Длина пина финала: хребет после стыка едет на тех же 2/3, и чтобы
+  // шарик доехал до FH = 548 (и растворился на последних FADE px) ровно к
+  // последнему px скролла, страница должна позволять докрутить до
+  // d = HANDOFF_D + FH/SLOPE = 1238. Структурно же страница кончается на
+  // d = 2H − vh (vh — высота вьюпорта в px макета; scale.js вписывает
+  // экран 832px в высоту с запасом, а при заполнении ширины подрезает
+  // его снизу — vh обычно 800–832). Разницу и добирает высота .fin-pin:
+  // PIN = vh − 426, обычно 374–406px макета, пересчитывается на resize.
 
   // «хребет» decor_dark.svg: вход из-под «Вывода» (верхняя кромка секции),
   // узлы-кружки, выход за нижнюю кромку. Вокруг кружков линии в макете
@@ -97,6 +112,26 @@
 
   function scale() { return pageInner.getBoundingClientRect().width / 1280; }
 
+  // текущая длина пина финала, px макета; пересчитывается в syncPin()
+  let pinLen = 0;
+
+  // высота обёртки .fin-pin = экран 832 + пин PIN. Родительский #page свою
+  // высоту пересчитывает только js/scale.js (по resize), поэтому после
+  // смены высоты dispatch'им resize сами. Сравнение со старым значением —
+  // защита от цикла: наш же resize-обработчик снова зовёт syncPin.
+  function syncPin() {
+    if (!wrapFinale) return;
+    const s = scale();
+    if (s <= 0) return;
+    const vh = document.documentElement.clientHeight / s;
+    pinLen = Math.max(HANDOFF_D + FH / SLOPE - (2 * H - vh), 0);
+    const hpx = Math.round((H + pinLen) * s);
+    if (wrapFinale.style.height !== hpx + 'px') {
+      wrapFinale.style.height = hpx + 'px';
+      try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    }
+  }
+
   function update() {
     const s = scale();
     if (s <= 0) return;
@@ -119,16 +154,23 @@
     // чёрный шарик финала, их прозрачности в сумме дают 1 (см. шапку)
     ballDecor.style.opacity = Math.min(Math.max((H - b) / FADE, 0), 1);
 
+    // ---------- пин финала ----------
+    // экран доезжает до верхней кромки (d = H) и встаёт: шифт съедает
+    // скролл один в один (в px макета, как у td-pin/sci-pin), чтобы хребет
+    // успел доехать до конца на константных 2/3; после PIN·s секция
+    // отпускается и доезжает вместе со страницей (в режиме заполнения
+    // ширины vh < H — при отпускании открывается подрезанный низ)
+    const shift = Math.min(Math.max(d - H, 0), pinLen);
+    if (shift === 0) secFinale.style.transform = '';
+    else secFinale.style.transform = 'translateY(' + shift + 'px)';
+
     // ---------- финал «именно поэтому появляется решение» ----------
-    // Реальный запас скролла: сколько px (в макетных) останется прокрутить
-    // после стыка до конца страницы. Вьюпорт выше одного экрана (scale.js
-    // вписывает 832px с запасом), поэтому это НЕ 832 − HANDOFF_D, а меньше.
-    // K подгоняется так, чтобы шарик доехал до конца хребта (и растворился
-    // на его последних 150px) ровно к последнему px скролла.
-    const dMax = (document.documentElement.scrollHeight - window.innerHeight) / s - topD;
-    const K = FH / Math.max(dMax - HANDOFF_D, 1);
-    const bfUncl = (d - HANDOFF_D) * K;
-    const bf = Math.min(Math.max(bfUncl, 0), FH);
+    // Та же SLOPE, что у тёмного экрана, и линейный ход от стыка до конца
+    // хребта. Формула одна и до, и во время пина: пока экран едет, шарик
+    // на экране дрейфует вверх, как на всех катыши; в пине шифт съедает
+    // скролл, и шарик спускается по хребту уже на стоячем экране — ровно
+    // до FH на последнем px страницы (см. PIN в шапке).
+    const bf = Math.min(Math.max((d - HANDOFF_D) * SLOPE, 0), FH);
     svgFinale.style.clipPath = 'inset(0px 0px ' + (FH - bf) + 'px 0px)';
     const pf = pointAtY(SPINE_FINALE, bf);
     ballFinale.style.transform = 'translate(' + pf[0] + 'px, ' + pf[1] + 'px)';
@@ -145,7 +187,8 @@
   }
 
   window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  window.addEventListener('load', update);
+  window.addEventListener('resize', function () { syncPin(); update(); });
+  window.addEventListener('load', function () { syncPin(); update(); });
+  syncPin();
   update();
 })();
