@@ -1,10 +1,14 @@
 /* =========================================================
-   МОБИЛЬНАЯ ВЕРСИЯ — мокап Figma 1972:766, канва 414×15964
-   Статичный лонг-рид (вариант C): нативный скролл, никаких
-   пинов и скролл-механик; единственный JS — масштаб (mobile.js).
+   МОБИЛЬНАЯ ВЕРСИЯ — мокап Figma 1989:846, канва 414×15832
+   Статичный лонг-рид (вариант C): нативный скролл отключён,
+   страница листается поэкранно (TikTok-механика) через белую
+   вуаль на границах (js/mobile.js); никаких пинов. Титульная
+   последовательность тёмного экрана m-quest — фиксированный
+   темп, скроллом не управляется; при возврате снизу вверх
+   экран «отматывается» к первой фразе.
    Координаты элементов заданы inline (дизайн-пиксели канвы),
-   локально внутри секций (глобальные минус y0 экрана).
-   Референс: proof/mobile-spec.txt, proof/mobile-1972-766.json.
+   локально внутри секций (глобальные минус y0 экрана);
+   исключение — фразы m-quest по центру (см. ниже).
    ========================================================= */
 
 :root {
@@ -17,7 +21,12 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body { background: var(--white); }
+html, body {
+  background: var(--white);
+  /* touch-action:none — гасим нативные тач-жесты (двойной тап, пинч,
+   пулл-ту-рифреш): скролл движется только от js/mobile.js */
+  touch-action: none;
+}
 
 /* масштабируемая канва: js/mobile.js ставит transform и высоту обёртки */
 #m-page { position: relative; margin: 0 auto; }
@@ -36,8 +45,8 @@ html, body { background: var(--white); }
 .m-hero, .m-benefits, .m-sci, .m-list, .m-finale { background: var(--white); }
 .m-quest, .m-statement, .m-card, .m-decor-sec { background: var(--black); }
 .m-concl { background: var(--orange); }
-/* высоты — ровно по мокапу; сумма 15964 = высота канвы 1972:766 */
-.m-hero     { height: 1792px; }
+/* высоты — ровно по мокапу; сумма 15832 = высота канвы 1989:846 */
+.m-hero     { height: 1660px; }
 .m-benefits { height: 3400px; }
 .m-list     { height: 4500px; }
 .m-quest, .m-statement, .m-card, .m-sci, .m-concl, .m-decor-sec, .m-finale { height: 896px; }
@@ -47,12 +56,14 @@ html, body { background: var(--white); }
 .m-h1 {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 50px; font-weight: 400; line-height: 100%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-sub {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 16px; font-weight: 500; line-height: 130%;
   text-align: right;
+  text-transform: uppercase;
   color: var(--red);
 }
 .m-num {
@@ -108,6 +119,7 @@ html, body { background: var(--white); }
 .m-h2 {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px; font-weight: 500; line-height: 110%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-lead20 {
@@ -122,7 +134,7 @@ html, body { background: var(--white); }
 }
 .m-h3 {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 38px; font-weight: 500; line-height: 130%;
+  font-size: 36px; font-weight: 500; line-height: 130%;
   color: var(--black);
 }
 /* тело пункта пользы: в мокапе у 01 — 16px, у 02–06 — 18px;
@@ -153,6 +165,42 @@ html, body { background: var(--white); }
   color: var(--white);
 }
 
+/* ---------- скроллтителлинг экрана «Не спешите верить заголовку…» ----------
+   Сознательное отклонение от мокапа: фразы стоят по центру экрана (а не на
+   top 213/569 с точкой слева) и выплывают по очереди с фиксированным темпом —
+   скролл на темп не влияет, сценарием рулит js/mobile.js (классы
+   .m-anim/.m-in/.m-out). Секция достижима только через гейт (гейты стоят
+   на всех границах смены цвета фона, в обе стороны): скролл стопорится,
+   белая вуаль подменяет экран — и уже на остановленном тёмном экране
+   «Не спешите верить…» выплывает, гаснет, и на её месте остаётся вопрос
+   «Учёные доказали или нам так сказали?». Кривая и
+   длительности — как у фиксированных переходов десктопа (.77,0,.18,1).
+   Класс .m-anim ставит только скрипт: без JS фразы видны статично по центру.
+   Белые точки декора у левого края (были (30,223) и (30,589)) убраны —
+   с центрированными фразами они не связаны. */
+.m-quest .m-st {
+  left: 50%; top: 50%; width: 318px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+/* стартовое состояние сценария: фраза на 26px ниже и прозрачна */
+.m-quest.m-anim .m-st {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 26px));
+  transition: opacity .6s cubic-bezier(.77,0,.18,1), transform .6s cubic-bezier(.77,0,.18,1);
+}
+/* фраза выплыла (вопрос остаётся, пока экран не «отматывают» входом снизу) */
+.m-quest.m-anim .m-st.m-in {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+/* первая фраза гаснет: доплывает вверх и растворяется */
+.m-quest.m-anim .m-st.m-out {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% - 18px));
+  transition-duration: .4s;
+}
+
 /* ---------- карточка 01 ---------- */
 
 .m-card-num {
@@ -163,6 +211,7 @@ html, body { background: var(--white); }
 .m-card-t {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 32px; font-weight: 400; line-height: 130%;
+  text-transform: uppercase;
   color: var(--white);
 }
 .m-card-p {
@@ -180,10 +229,12 @@ html, body { background: var(--white); }
 
 /* статичный кадр тикера [Контекст]: скобки — Roboto Mono,
    буквы — Plex Mono с раздвинутым трекингом (кадр из мокапа) */
+/* мелкий тикер карточки: в мокапе «контекст» строчными */
 .m-tick {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px; font-weight: 500; line-height: 1;
   letter-spacing: 0.16em;
+  text-transform: lowercase;
   color: var(--gray);
   white-space: nowrap;
 }
@@ -200,6 +251,7 @@ html, body { background: var(--white); }
 .m-sci-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 50px; font-weight: 500; line-height: 130%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-sci-b {
@@ -214,11 +266,13 @@ html, body { background: var(--white); }
 .m-cl-h2 {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 44px; font-weight: 500; line-height: 130%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-cl-t {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 36px; font-weight: 500; line-height: 130%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-cl-lead {
@@ -226,10 +280,11 @@ html, body { background: var(--white); }
   font-size: 20px; line-height: 125%;
   color: var(--black);
 }
-/* [контекст] в шапке чек-листа */
+/* [контекст] в шапке чек-листа: капс в мокапе */
 .m-cltick {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 44px; font-weight: 500; line-height: 1;
+  text-transform: uppercase;
   color: var(--black);
   white-space: nowrap;
 }
@@ -249,6 +304,7 @@ html, body { background: var(--white); }
 .m-item-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 29px; font-weight: 500; line-height: 100%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-item-q {
@@ -273,6 +329,7 @@ html, body { background: var(--white); }
   font-family: 'IBM Plex Mono', monospace;
   font-size: 80px; font-weight: 400; line-height: 130%;
   text-align: center;
+  text-transform: uppercase;
   color: var(--white);
 }
 .m-concl-t {
@@ -298,6 +355,7 @@ html, body { background: var(--white); }
 .m-dc-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px; font-weight: 500; line-height: 110%;
+  text-transform: uppercase;
   color: var(--white);
 }
 
@@ -306,19 +364,22 @@ html, body { background: var(--white); }
 .m-fin-h {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px; font-weight: 400; line-height: 110%;
+  text-transform: uppercase;
   color: var(--black);
 }
 .m-fin-r {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px; font-weight: 400; line-height: 130%;
   text-align: right;
+  text-transform: uppercase;
   color: var(--black);
 }
-/* крупный статичный тикер [Контекст] между оранжевыми линейками */
+/* крупный статичный тикер [КОНТЕКСТ]: капс в мокапе */
 .m-tick-lg {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 51px; font-weight: 400; line-height: 1;
   letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--black);
   white-space: nowrap;
 }

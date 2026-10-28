@@ -349,18 +349,11 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   <div class="td-view td-pub">
     <p class="td-lead">разбор поста из медиа:</p>
 
-    <span class="tag-label" style="left:491px;top:172px;">СТРАХ</span>
-    <span class="tag-label" style="left:764px;top:194px;">МАГИЯ</span>
-    <span class="tag-label" style="left:786px;top:438px;">СТРАХ</span>
-    <span class="tag-label" style="left:1067px;top:471px;">МИФ</span>
-    <span class="tag-label" style="left:970px;top:491px;">СТРАХ</span>
-
-    <div class="td-article">
-      <p>Негативные мысли приводят к деменции — регулярное зацикливание на плохом буквально разрушает мозг изнутри.<br>
-      Здоровый мозг сам старается удерживать мышление в более оптимистичном русле, но при намеренном уходе в негатив сильно растёт уровень кортизола — гормон повреждает нейроны, ухудшая когнитивные функции и буквально уничтожая мозг изнутри.</p>
-      <p>Вывод простой: чем больше живёте в плохих мыслях — тем быстрее изнашивается ваш мозг.</p>
-      <p>Думаем только о хорошем.</p>
-    </div>
+    <!-- пост с метками — цельный SVG-экспорт слоя из макета (Group 492,
+         2010:1023, (491;242) 605×299): текст поста + оранжевые метки
+         СТРАХ/МАГИЯ/МИФ с коннекторами вшиты в файл, поэтому HTML-метки
+         .tag-label удалены — они бы дублировали вшитые -->
+    <img class="td-article-img" src="assets/svg/article.svg" alt="пост с метками страх, магия, миф">
   </div>
 
   <!-- слой: КОНТЕКСТ -->
@@ -368,16 +361,21 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <h3 class="td2-h" style="left:537px;top:110px;">ПОСТ ПЕРЕСКАЗЫВАЕТ СТАТЬЮ</h3>
     <p class="td2-p td2-small" style="left:537px;top:156px;width:330px;">статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья</p>
 
-    <img class="td2-img" style="left:927px;top:110px;width:212px;height:195px;" src="assets/img/scheme.png" alt="схема: пост усиливает утверждение статьи">
+    <!-- схема перерисована в макете (1982:936): пилюля ПОСТ → «усиливает
+         утверждение» → BBC Science Focus Magazine; экспорт 2x 518×368 -->
+    <img class="td2-img" style="left:893px;top:110px;width:259px;height:184px;" src="assets/img/scheme.png" alt="схема: пост усиливает утверждение статьи">
 
     <h3 class="td2-h" style="left:537px;top:288px;">ЧТО УТВЕРЖДАЕТ ПОСТ</h3>
     <p class="td2-p" style="left:537px;top:334px;width:451px;">«Негативные мысли буквально разрушают мозг изнутри»</p>
 
     <h3 class="td2-h" style="left:537px;top:414px;">ЧТО ГОВОРИТ НАУЧПОП СТАТЬЯ</h3>
-    <p class="td2-p" style="left:537px;top:460px;width:451px;">BBC Science Focus рассказывает о связи повторяющегося негативного мышления с риском деменции и предполагает, что оно может ускорять развитие заболевания.</p>
+    <p class="td2-p" style="left:537px;top:460px;width:470px;">BBC Science Focus рассказывает о связи повторяющегося негативного<br>мышления с риском деменции и предполагает, что оно может<br>ускорять развитие заболевания.</p>
 
     <h3 class="td2-h" style="left:537px;top:580px;">ГДЕ ПОСТ ПРЕУВЕЛИЧИВАЕТ</h3>
-    <p class="td2-p" style="left:537px;top:626px;width:451px;">«Повторяющееся негативное мышление» превращается в любые плохие мысли. «Может быть связано с риском» превращается в «приводит к деменции». Предположение о влиянии на мозг становится утверждением о его буквальном разрушении. Добавляется категоричный совет: «Думаем только о хорошем».</p>
+    <!-- переносы — как в макете (1982:923): каждое предложение с новой
+         строки, внутри предложений — жёсткие <br>; натуральный перенос
+         в 470px эти короткие строки («плохие мысли.») не повторяет -->
+    <p class="td2-p" style="left:537px;top:626px;width:470px;">«Повторяющееся негативное мышление» превращается в любые<br>плохие мысли.<br>«Может быть связано с риском» превращается в «приводит<br>к деменции».<br>Предположение о влиянии на мозг становится утверждением о его<br>буквальном разрушении.<br>Добавляется категоричный совет: «Думаем только о хорошем».</p>
   </div>
 
   <!-- слой: ПЕРВОИСТОЧНИК -->
@@ -400,6 +398,23 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края) -->
   <div class="td-view td-vd">
     <p class="vd-main">Выводы искажены и преувеличены</p>
+
+    <!-- цепочка разбора: пост → статья → преувеличение → исследование → данные
+         (мокап 1982:873). Коннектор — линия 1px с точкой на нижнем конце;
+         зазор перед «НАУЧНОЕ ИССЛЕДОВАНИЕ» шире остальных — так в макете -->
+    <div class="vd-node vd-node-fill" style="left:605px;top:278px;width:208px;height:62px;font-size:14px;">ПОСТ<br>[Негативные мысли<br>приводят к деменции]</div>
+    <span class="vd-link" style="left:708px;top:340px;height:25px;"></span>
+    <div class="vd-node" style="left:612px;top:370px;width:192px;height:24px;font-size:12px;">усиливает утверждение</div>
+    <span class="vd-link" style="left:708px;top:394px;height:25px;"></span>
+    <div class="vd-node vd-node-ink" style="left:579px;top:424px;width:259px;height:44px;font-size:14px;">BBC Science Focus Magazine<br>научно-популярная статья</div>
+    <span class="vd-link vd-link-ink" style="left:708px;top:468px;height:24px;"></span>
+    <div class="vd-node" style="left:612px;top:497px;width:192px;height:24px;font-size:12px;">преувеличивает выводы</div>
+    <span class="vd-link" style="left:708px;top:521px;height:25px;"></span>
+    <div class="vd-node vd-node-ink" style="left:570px;top:551px;width:276px;height:44px;font-size:14px;">НАУЧНОЕ ИССЛЕДОВАНИЕ<br>Alzheimer’s &amp; Dementia, 2020</div>
+    <span class="vd-link vd-link-ink" style="left:708px;top:595px;height:24px;"></span>
+    <div class="vd-node" style="left:648px;top:624px;width:120px;height:24px;font-size:12px;">анализирует</div>
+    <span class="vd-link" style="left:708px;top:648px;height:25px;"></span>
+    <div class="vd-node vd-node-ink" style="left:591px;top:678px;width:234px;height:62px;font-size:14px;">ДАННЫЕ<br>Наблюдения, когнитивные<br>тесты и биомаркеры</div>
   </div>
 
   <div class="td-tabs">
@@ -578,5 +593,6 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 <script src="js/check.js"></script>
 <script src="js/decor.js"></script>
 <script src="js/sides.js"></script>
-<script src="js/scientists.js"></script></body>
+<script src="js/scientists.js"></script>
+<script src="js/tdgates.js"></script></body>
 </html>

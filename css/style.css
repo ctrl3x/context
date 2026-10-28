@@ -835,13 +835,13 @@ body.sides-dark { background: var(--black); }
   line-height: 130%;
 }
 
-.tag-label {
+/* пост с метками — SVG-экспорт слоя публикации (Group 492): вектор,
+   кратен любому масштабу страницы; метки вшиты в сам файл */
+.td-article-img {
   position: absolute;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: var(--orange);
+  left: 491px; top: 242px;
+  width: 605px; height: 299px;
 }
-
 .td-tabs { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .td-tab {
   position: absolute;
@@ -869,17 +869,6 @@ body.sides-dark { background: var(--black); }
   color: var(--black);
   white-space: nowrap;
 }
-
-.td-article {
-  position: absolute;
-  left: 491px; top: 311px;
-  width: 605px;
-  font-family: 'Arsenal', serif;
-  font-size: 16px;
-  line-height: 135%;
-}
-.td-article p { margin-bottom: 19px; }
-.td-article p:first-child { font-weight: 400; }
 
 .td-strip {
   position: absolute;
@@ -1046,13 +1035,46 @@ body.sides-dark { background: var(--black); }
 
 .vd-main {
   position: absolute;
-  left: 280px; top: 390px;
+  left: 348px; top: 152px;
   width: 720px;
   text-align: center;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 40px;
   color: var(--white);
 }
+
+/* цепочка под заголовком (мокап 1982:873): пилюли на оранжевом — белые и
+   чёрные обводки, заливка только у «ПОСТ»; коннектор — линия 1px, точка
+   (⌀5) сидит на его нижнем конце, до следующей пилюли остаётся зазор */
+.vd-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid var(--white);
+  border-radius: 120px;
+  font-family: 'IBM Plex Mono', monospace;
+  line-height: 120%;
+  color: var(--white);
+}
+.vd-node-ink { border-color: var(--black); color: var(--black); }
+.vd-node-fill { background: var(--white); border-color: var(--orange); color: var(--orange); }
+.vd-link {
+  position: absolute;
+  width: 1px;
+  background: var(--white);
+}
+.vd-link::after {
+  content: "";
+  position: absolute;
+  left: -2px; bottom: -2.5px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--white);
+}
+.vd-link-ink { background: var(--black); }
+.vd-link-ink::after { background: var(--black); }
 
 /* =========================================================
    10. CHECKLIST
