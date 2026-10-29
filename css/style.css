@@ -8,15 +8,13 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body { background: var(--white); }
+/* фон белый только у html (canvas/overscroll): body прозрачен, чтобы
+   не накрывать слой z-index:-1, которым js/sides.js красит бока */
+html { background: var(--white); }
 
 body {
   overflow-x: hidden;
-  transition: background-color 0.3s ease;
 }
-
-/* тёмный экран у центра вьюпорта: боковые поля за пределами колонки тоже чёрные */
-body.sides-dark { background: var(--black); }
 
 #page {
   width: 1280px;
@@ -274,6 +272,11 @@ body.sides-dark { background: var(--black); }
   position: relative;
   height: 3532px; /* 2700 (PIN) + 832 (экран) */
   view-timeline-name: --statement;
+  /* чёрный фон обёртки: пока экран приколот transform'ом, бока страницы
+     (слой js/sides.js) читают диапазон всей обёртки, а не только экрана.
+     Обнажаемые сверху/снизу области обёртки не видны: пин начинается до
+     того, как зазор под экраном доходит до нижней кромки вьюпорта */
+  background: var(--black);
 }
 .statement-pin .sec-statement {
   position: relative;
@@ -535,6 +538,10 @@ body.sides-dark { background: var(--black); }
   width: 1280px; height: 832px;
   pointer-events: none;
   overflow: hidden;
+  /* ЛУПА ВРЕМЕННО СКРЫТА (запрос «убери с экранов 01-04»): слой не рисуется,
+     но остаётся в layout и в логике — photoPin двигает transform, on-stage
+     переключается, dy4 считается. Вернуть — убрать visibility:hidden. */
+  visibility: hidden;
 }
 .cards-photo img {
   position: absolute;
@@ -662,6 +669,9 @@ body.sides-dark { background: var(--black); }
      transform (см. scrub там же): position:sticky тут нельзя —
      body с overflow-x:hidden остаётся scroll-контейнером (overflow-y
      считается auto) и sticky прицепляется к нему, а не к окну */
+  /* СЕЙЧАС ВЫКЛЮЧЕНО (временно): разворот маски погашен флагом EXPAND
+     в js/scientists.js — там же высота обёртки режется до 832px (экран);
+     это значение остаётся эталоном включённого состояния */
   height: 2496px;
 }
 /* поверх руки-лупы (z-index 2) и карточки 04: экран закрывает их целиком */
@@ -792,12 +802,19 @@ body.sides-dark { background: var(--black); }
    8. TEARDOWN
 ========================================================= */
 
-.sec-teardown { background: var(--white); }
+/* overflow:visible — чёрная панель .td-left выезжает в боковое поле окна
+   (--td-bleed ставит js/teardown.js): на широких экранах колонка центрируется
+   с белыми полями, и без вылета панель «повисала» в отрыве от левого края
+   экрана. Единственный ребёнок, которому нельзя рисовать за краем холста, —
+   оранжевый слой вердикта: он укрыт обёрткой .td-vd-clip */
+.sec-teardown { background: var(--white); overflow: visible; }
 
 .td-bar {
   position: absolute;
-  left: 0; top: 0;
-  width: 1280px; height: 70px;
+  /* тёмный заголовок тянется на всю ширину окна: вылет в оба боковых поля
+     (--td-bleed ставит js/teardown.js); текст остаётся по центру экрана */
+  left: calc(-1 * var(--td-bleed, 0px)); top: 0;
+  width: calc(1280px + 2 * var(--td-bleed, 0px)); height: 70px;
   background: var(--black);
   color: var(--white);
   font-size: 32px; font-weight: 500;
@@ -808,13 +825,17 @@ body.sides-dark { background: var(--black); }
 
 .td-left {
   position: absolute;
-  left: 0; top: 70px;
-  width: 413px; height: 762px;
+  /* вылет в боковое поле: панель доезжает до настоящего левого края окна
+     (--td-bleed — ширина поля в px макета, 0 на вписанных по ширине окнах) */
+  left: calc(-1 * var(--td-bleed, 0px)); top: 70px;
+  width: calc(413px + var(--td-bleed, 0px)); height: 762px;
   background: var(--black);
 }
 .td-post-title {
   position: absolute;
-  left: 40px; top: 40px;
+  /* контент центрируется в ВИДИМОЙ части панели: её начало уехало влево на
+     вылет, поэтому внутри панели контент сдвигается вправо на вылет/2 */
+  left: calc(40px + var(--td-bleed, 0px) / 2); top: 40px;
   width: 333px;
   font-size: 20px;
   line-height: 130%;
@@ -822,7 +843,7 @@ body.sides-dark { background: var(--black); }
 }
 .td-img {
   position: absolute;
-  left: 40px; top: 160px;
+  left: calc(40px + var(--td-bleed, 0px) / 2); top: 160px;
   width: 334px; height: 552px;
   border: 1px solid var(--gray);
   object-fit: cover;
@@ -932,6 +953,10 @@ body.sides-dark { background: var(--black); }
 }
 
 .td-view { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+/* окно вердикта: оранжевый слой — единственный с непрозрачным фоном, его
+   сдвиг ±60px при переходах рисовал бы за правым краем холста (секция теперь
+   overflow:visible ради вылета чёрной панели в боковое поле) */
+.td-vd-clip { position: absolute; inset: 0; overflow: hidden; z-index: 1; pointer-events: none; }
 .td-left { z-index: 2; }
 .td-strip { z-index: 3; background: var(--white); }
 .td-tabs { z-index: 4; }  /* над полосами: кружки и подписи табов не затираются «ластиком» */
@@ -943,6 +968,15 @@ body.sides-dark { background: var(--black); }
    (уход — сразу, приход — с задержкой 0.4 с, во второй половине). */
 
 .td-strip, .td-tab { transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
+
+/* правые табы (и их полосы) прижимаются к настоящему правому краю окна:
+   базовый сдвиг вправо на вылет. Целевые позиции переходов ниже — в
+   координатах холста, поэтому вылет в них НЕ вычитается: целевой
+   transform полностью заменяет базовый (не складывается с ним), так что
+   стыковка всегда к краю чёрной панели в координатах холста. Таб
+   «ПУБЛИКАЦИЯ» живёт у края панели и не смещается */
+.strip-ctx, .strip-src, .strip-vd,
+.tab-ctx, .tab-src, .tab-vd { transform: translateX(var(--td-bleed, 0px)); }
 
 /* целевые положения полос и табов по состояниям */
 .td-pin.s1 .strip-ctx, .td-pin.s2 .strip-ctx { transform: translateX(-679px); }
@@ -969,7 +1003,8 @@ body.sides-dark { background: var(--black); }
 }
 .td-pub { transition-delay: 0.4s; }   /* возврат публикации — во второй половине */
 
-/* левая панель с постом: уезжает влево вместе с полосами на вердикте */
+/* левая панель с постом: уезжает влево вместе с полосами на вердикте;
+   на вылет в боковое поле тоже — иначе в поле осталась бы чёрная полоса */
 .td-left { transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
 
 /* состояние s1: контекст */
@@ -1002,7 +1037,7 @@ body.sides-dark { background: var(--black); }
 }
 
 /* состояние s3: вердикт */
-.td-pin.s3 .td-left { transform: translateX(-413px); }
+.td-pin.s3 .td-left { transform: translateX(calc(-413px - var(--td-bleed, 0px))); }
 .td-pin.s3 .td-pub {
   opacity: 0;
   transform: translateX(-60px);
@@ -1288,7 +1323,46 @@ body.sides-dark { background: var(--black); }
   font-family: 'Roboto Mono', monospace;
   font-size: 128px;
   color: var(--orange);
+  /* ход скобки строго линейный, как у тикера чек-листа: 8 букв за 0.8 с =
+     0.1 с на букву. Плавный ease ломал бы синхрон с задержками букв */
+  transition: transform 0.8s linear;
 }
+/* Логотип-тикер финала: та же механика, что у тикера чек-листа (.cl-ticker):
+   правая скобка в сомкнутом состоянии наезжает на левую; по классу .in
+   (вешает js/decor.js при входе лого в кадр) отъезжает вправо, буквы
+   «печатаются» одна за другой. Буквы всегда занимают место в потоке
+   (анимируется только opacity). Отличие от чек-листа: буквы — прямые
+   флекс-элементы .giant-ctx (space-between разводит их по ширине строки),
+   поэтому nth-child считается по всем детям — скобки занимают слоты 1 и 10,
+   буквам достаются 2–9 */
+.giant-ctx .br-r { transform: translateX(calc(var(--ctx-shift, 900px) * -1)); }
+/* в раскрытом состоянии правая скобка возвращается на своё место */
+.giant-ctx.in .br-r { transform: translateX(0); }
+.giant-ctx .ch {
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+/* сжатие (базовое состояние): скобка едет справа налево и «съедает» буквы —
+   k-я буква (слот k+1) прячется, когда скобка наезжает на её правый край
+   (0.8s − 0.1s·k) */
+.giant-ctx .ch:nth-child(2) { transition-delay: 0.7s; }
+.giant-ctx .ch:nth-child(3) { transition-delay: 0.6s; }
+.giant-ctx .ch:nth-child(4) { transition-delay: 0.5s; }
+.giant-ctx .ch:nth-child(5) { transition-delay: 0.4s; }
+.giant-ctx .ch:nth-child(6) { transition-delay: 0.3s; }
+.giant-ctx .ch:nth-child(7) { transition-delay: 0.2s; }
+.giant-ctx .ch:nth-child(8) { transition-delay: 0.1s; }
+.giant-ctx .ch:nth-child(9) { transition-delay: 0s; }
+.giant-ctx.in .ch { opacity: 1; }
+/* при раскрытии — слева направо, синхронно со скобкой */
+.giant-ctx.in .ch:nth-child(2) { transition-delay: 0s; }
+.giant-ctx.in .ch:nth-child(3) { transition-delay: 0.1s; }
+.giant-ctx.in .ch:nth-child(4) { transition-delay: 0.2s; }
+.giant-ctx.in .ch:nth-child(5) { transition-delay: 0.3s; }
+.giant-ctx.in .ch:nth-child(6) { transition-delay: 0.4s; }
+.giant-ctx.in .ch:nth-child(7) { transition-delay: 0.5s; }
+.giant-ctx.in .ch:nth-child(8) { transition-delay: 0.6s; }
+.giant-ctx.in .ch:nth-child(9) { transition-delay: 0.7s; }
 
 /* =========================================================
    11b. ВЫВОД (orange) + 11c. ВЫВОД (white detail)

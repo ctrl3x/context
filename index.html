@@ -308,7 +308,10 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
      разворот играет фиксированные 620 мс, дефолт фонарика доезжает в
      центр (326;416); секцию на это время держит ручной пин transform'ом
      (js/scientists.js, паттерн no-tl ветки teardown.js — sticky не цепляется
-     к окну при скролле на body) -->
+     к окну при скролле на body).
+     СЕЙЧАС разворот выключен (флаг EXPAND в js/scientists.js): хвост пина
+     отрезан (высота обёртки 832), маска живёт панелью с фонариком, стык
+     с разбором — обычный слайд -->
 <div class="sci-pin">
 <section class="sec sec-white sec-scientists">
   <h2 class="sci-title">«Учёные доказали:<br>[X] меняет вашу жизнь»</h2>
@@ -395,7 +398,11 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <p class="td2-p" style="left:583px;top:726px;width:444px;">Нельзя заключить, что негативное мышление вызывает деменцию или что отказ от негативных мыслей предотвращает её развитие.</p>
   </div>
 
-  <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края) -->
+  <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края).
+       Обёртка-окно .td-vd-clip: секция overflow:visible (панель выезжает
+       в боковое поле), а оранжевый фон при сдвиге ±60px рисовал бы за
+       правым краем холста — единственный слой с непрозрачным фоном -->
+  <div class="td-vd-clip">
   <div class="td-view td-vd">
     <p class="vd-main">Выводы искажены и преувеличены</p>
 
@@ -415,6 +422,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <div class="vd-node" style="left:648px;top:624px;width:120px;height:24px;font-size:12px;">анализирует</div>
     <span class="vd-link" style="left:708px;top:648px;height:25px;"></span>
     <div class="vd-node vd-node-ink" style="left:591px;top:678px;width:234px;height:62px;font-size:14px;">ДАННЫЕ<br>Наблюдения, когнитивные<br>тесты и биомаркеры</div>
+  </div>
   </div>
 
   <div class="td-tabs">
@@ -569,8 +577,13 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   <p class="h40 fin-right caps">в виде сервиса</p>
 
   <hr class="orange-rule" style="top:560px;">
+  <!-- логотип-тикер: та же анимация, что у «ИЗУЧАЙТЕ [КОНТЕКСТ]» в чек-листе —
+       правая скобка сомкнута на левой, по классу .in (вешает js/decor.js, когда
+       лого вошло в кадр) отъезжает вправо и «печатает» буквы по одной. Буквы —
+       прямые флекс-элементы (space-between разводит их по строке), заворачивать
+       их в обёртку нельзя — сломало бы разводку -->
   <div class="giant-ctx">
-    <span class="br big">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br big">]</span>
+    <span class="br big br-l">[</span><span class="ch">К</span><span class="ch">О</span><span class="ch">Н</span><span class="ch">Т</span><span class="ch">Е</span><span class="ch">К</span><span class="ch">С</span><span class="ch">Т</span><span class="br big br-r">]</span>
   </div>
   <hr class="orange-rule" style="top:762px;">
 
@@ -586,6 +599,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 </div>
 </div>
 <script src="js/scale.js"></script>
+<script src="js/fades.js"></script>
 <script src="js/hero.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/teardown.js"></script>

@@ -36,9 +36,12 @@
   // PIN = HANDOFF_D + FH/SLOPE − (2H − vh) js выставляет высотой обёртки
   // .fin-pin (syncPin ниже); пока экран приколот transform'ом (как
   // td-pin/sci-pin, sticky нельзя), шарик спускается по хребту на стоячем
-  // экране и растворяется на последних FADE px ровно к последнему px
-  // скролла. Без JS обёртка остаётся высотой 832 (пина нет), svg виден
-  // целиком — фолбэк статикой, как и у остальных катыши.
+  // экране. Растворение начинается там же (последние FADE px хребта), но
+  // кончается с запасом RESERVE — за ~120px скролла до последнего px
+  // страницы: долиставший до упора пользователь шарика уже не видит, и
+  // погрешности округления высоты пина его не вылавливают. Без JS обёртка
+  // остаётся высотой 832 (пина нет), svg виден целиком — фолбэк статикой,
+  // как и у остальных катыши.
   const secDecor = document.querySelector('.sec-decor');
   const secFinale = document.querySelector('.sec-finale');
   const svgDecor = secDecor && secDecor.querySelector('.lines-svg');
@@ -56,13 +59,20 @@
   // дрейфует вверх, но относительно секции движется по линии сверху вниз.
   const SLOPE = 2 / 3;
   const FADE = 150; // длина кроссфейда на стыке и растворения в конце, px хребта
+  // Насколько раньше конца хребта шарик уже невидим: 80px хребта = 120px
+  // скролла (80 / SLOPE). Запрос: долиставший до конца страницы пользователь
+  // не должен видеть шарик — «ноль ровно в последнем px» слишком хрупок
+  // (округление высоты пина, клампинг скролла). Хвост хребта после узла
+  // (790;473) проявляется уже без шарика — линия и так кончается в воздухе.
+  const RESERVE = 80;
   // d (прогресс прокрутки тёмного экрана), при котором граница доходит до
   // его нижней кромки: (d + H)·SLOPE = H → d = 416. В этот момент кромка
   // на середине вьюпорта (832 − 416), стык ровно в кадре.
   const HANDOFF_D = H / SLOPE - H;
   // Длина пина финала: хребет после стыка едет на тех же 2/3, и чтобы
-  // шарик доехал до FH = 548 (и растворился на последних FADE px) ровно к
-  // последнему px скролла, страница должна позволять докрутить до
+  // шарик доехал до FH = 548 (растворение — на последних FADE px, но
+  // с запасом RESERVE) ровно к последнему px скролла, страница должна
+  // позволять докрутить до
   // d = HANDOFF_D + FH/SLOPE = 1238. Структурно же страница кончается на
   // d = 2H − vh (vh — высота вьюпорта в px макета; scale.js вписывает
   // экран 832px в высоту с запасом, а при заполнении ширины подрезает
@@ -125,7 +135,15 @@
     if (s <= 0) return;
     const vh = document.documentElement.clientHeight / s;
     pinLen = Math.max(HANDOFF_D + FH / SLOPE - (2 * H - vh), 0);
-    const hpx = Math.round((H + pinLen) * s);
+    // Единицы — px макета, БЕЗ множителя s: внутри #page-inner css-пиксель
+    // и есть пиксель макета (масштабирует transform самого #page-inner),
+    // высоты остальных пинов заданы так же (statement-pin 3532, td-pin
+    // 4032). Множитель ·s сдвигал фактический конец страницы на
+    // 1238·(s − 1): при s < 1 (узкие окна) страница кончалась раньше
+    // хребта — шарик зависал у последнего экрана видимым; при s > 1 —
+    // мёртвый хвост скролла и пустая полоса под секцией. Верно было только
+    // при s = 1 (напр. окно 1280×800).
+    const hpx = Math.round(H + pinLen);
     if (wrapFinale.style.height !== hpx + 'px') {
       wrapFinale.style.height = hpx + 'px';
       try { window.dispatchEvent(new Event('resize')); } catch (e) {}
@@ -178,11 +196,13 @@
     // последних FADE px хребта декора (b от 682 до 832), чёрный стоит на
     // начале своего хребта у стыка и проявляется — сумма прозрачностей
     // ровно 1, выглядит как перекраска одного шарика у границы. Дальше
-    // шарик растворяется на последних FADE px своего хребта — он кончается
-    // в воздухе над оранжевой линейкой, и висящая «бусина» в конце страницы
-    // выглядела бы забытой.
+    // шарик растворяется: старт тот же (за FADE px до конца хребта,
+    // bf = 398), но окно сжато до FADE − RESERVE и кончается на RESERVE px
+    // раньше — шарик исчезает быстрее и не доживает до последнего экрана
+    // (хребет тянется до 548 «в воздухе» над оранжевой линейкой, висящая
+    // «бусина» в конце страницы выглядела бы забытой).
     const fadeIn = Math.min(Math.max((b - (H - FADE)) / FADE, 0), 1);
-    const fadeOut = Math.min(Math.max((FH - bf) / FADE, 0), 1);
+    const fadeOut = Math.min(Math.max((FH - RESERVE - bf) / (FADE - RESERVE), 0), 1);
     ballFinale.style.opacity = Math.min(fadeIn, fadeOut);
   }
 
@@ -191,4 +211,107 @@
   window.addEventListener('load', function () { syncPin(); update(); });
   syncPin();
   update();
+})();
+
+/* ============================================================
+   Логотип-тикер финала «[КОНТЕКСТ]»: та же анимация, что у тикера
+   чек-листа (js/checklist.js) — скролл только решает, когда лого в кадре
+   (класс .in по IntersectionObserver), сам переход играют CSS-transition'ы
+   фиксированной длительности. Отличие одно: буквы здесь — прямые
+   флекс-элементы (space-between разводит их по строке), обёртки .ctx-word
+   нет, поэтому «ширину слова» меряем как расстояние от правого края левой
+   скобки до левого края правой — при снятом transform, иначе сомкнутая
+   правая скобка исказит замер.
+   ============================================================ */
+(function () {
+  const logo = document.querySelector('.giant-ctx');
+  if (!logo) return;
+  const pageInner = document.getElementById('page-inner');
+  const brs = logo.querySelectorAll('.br');
+  const brR = logo.querySelector('.br-r');
+  // стартовый сдвиг правой скобки: наезжает на левую в сомкнутом состоянии.
+  // Ширину меряем по факту и делим на scale страницы (getBoundingClientRect
+  // даёт размер уже после transform: scale). Fallback 900px — на случай,
+  // если скрипт не успел измерить шрифт
+  function measure() {
+    if (!pageInner || !brR || !brs.length) return;
+    const s = pageInner.getBoundingClientRect().width / 1280;
+    if (s <= 0) return;
+    // подмену переменной и замер делаем без анимации и transform — иначе
+    // при перемеривании после загрузки шрифта скобка «доедет» на пару
+    // пикселей, а rect снялся бы со старым сдвигом. Всё в одном JS-такте,
+    // поэтому промежуточных кадров браузер не рисует
+    brs.forEach(function (b) { b.style.transition = 'none'; b.style.transform = 'none'; });
+    const shift = (brR.getBoundingClientRect().left -
+                   brs[0].getBoundingClientRect().right) / s;
+    logo.style.setProperty('--ctx-shift', shift + 'px');
+    void logo.offsetWidth; // форсируем reflow, чтобы новый сдвиг применился сразу
+    brs.forEach(function (b) { b.style.transition = ''; b.style.transform = ''; });
+  }
+  measure();
+  // после загрузки IBM Plex Mono ширина букв меняется — перемеряем
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(measure);
+  }
+  window.addEventListener('load', measure);
+  window.addEventListener('resize', measure);
+
+  // без IntersectionObserver (совсем старые браузеры) просто показываем
+  // лого раскрытым — лучше статика, чем навсегда сомкнутые скобки
+  if (!('IntersectionObserver' in window)) {
+    logo.classList.add('in');
+    return;
+  }
+
+  // пульс: пока лого в кадре, через паузу скобки схлопываются обратно
+  // и снова раскрываются. Тайминги те же, что у тикера чек-листа.
+  // Таймеры живут только пока финал виден — ушёл со скроллом, цикл
+  // останавливается (иначе анимация гонялась бы впустую)
+  const COLLAPSE = 1.4e3; // длительность «сжатия» + пауза сомкнутого состояния
+  const PERIOD = 6.0e3;   // раз в сколько секунд повторяется пульс
+  let loopT1 = null, loopT2 = null, reopenT = null, visible = false;
+
+  function startLoop() {
+    // первый пульс — после того, как доиграла стартовая анимация раскрытия
+    loopT1 = setTimeout(function () {
+      pulse();
+      loopT2 = setInterval(pulse, PERIOD);
+    }, 3.2e3);
+  }
+  function pulse() {
+    // сжатие запускаем только если лого сейчас раскрыто
+    if (!logo.classList.contains('in')) return;
+    logo.classList.remove('in');
+    clearTimeout(reopenT);
+    reopenT = setTimeout(function () {
+      // раскрываем обратно только если финал ещё на экране —
+      // иначе «доигравший» таймер вруби раскрытие в скрытой секции
+      if (visible) logo.classList.add('in');
+    }, COLLAPSE);
+  }
+  function stopLoop() {
+    clearTimeout(loopT1);
+    clearInterval(loopT2);
+    clearTimeout(reopenT);
+    loopT1 = loopT2 = reopenT = null;
+  }
+
+  // два порога: лого активируется, когда больше чем на 60% в кадре;
+  // сброс — только когда лого целиком ушло с экрана, чтобы анимация
+  // переигрывалась при каждом возвращении, но не мигала на границе
+  const io = new IntersectionObserver(function (entries) {
+    for (let i = 0; i < entries.length; i++) {
+      const e = entries[i];
+      if (!e.isIntersecting) {
+        visible = false;
+        logo.classList.remove('in');
+        stopLoop();
+      } else if (e.intersectionRatio >= 0.6) {
+        visible = true;
+        logo.classList.add('in');
+        if (!loopT1) startLoop();
+      }
+    }
+  }, { threshold: [0, 0.6] });
+  io.observe(logo);
 })();

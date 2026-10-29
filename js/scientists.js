@@ -12,6 +12,13 @@
   // её через calc(): растяжение маски и панели, позиция текста,
   // интерлиньяж. Двойной путь CSS/JS не нужен: твин чисто JS и одинаков
   // везде, где работает calc(var())
+  //
+  // Стык с js/tdgates.js: на время форвард-твина на обёртке висит класс
+  // .sci-expanding — гейт первого стыка ждёт его (не перехватывает жест
+  // вниз), чтобы вуаль не срезала недоигравший разворот
+  //
+  // ВРЕМЕННО ВЫКЛЮЧЕНО (код не удалён): разворот в фулскрин погашен
+  // флагом EXPAND ниже — состояние прижато к панели, скролл его не трогает
   const mask = document.querySelector('.sci-mask');
   const panel = document.querySelector('.sci-panel');
   const pin = document.querySelector('.sci-pin');
@@ -30,7 +37,16 @@
   const FADE = 832;
   const STRETCH = 832;
   const HOLD = 832;
-  const TAIL = STRETCH + HOLD; // стоянка секции на вьюпорте после зоны
+  // ВЫКЛЮЧЕНО (временно, код разворота ниже не удалён): растяжение маски
+  // в фулскрин «вопросы». EXPAND=false прижимает состояние к панели (p≡0),
+  // отрезает хвост пина (TAIL=0; высоту .sci-pin режем до 832 ниже — иначе
+  // под экраном оставались бы 1664px мёртвого скролла) и уводит #sci-step2
+  // в панельное превью. Зоны первого стыка в js/tdgates.js вырождаются
+  // в пустые сами по арифметике (aDown = S+STRETCH·s совпадает с tdTop),
+  // его константы STRETCH/HOLD не трогаем — понадобятся при включении.
+  // Вернуть разворот — поставить true
+  const EXPAND = false;
+  const TAIL = EXPAND ? STRETCH + HOLD : 0; // стоянка секции на вьюпорте после зоны
 
   const DUR = 620; // длительность разворота — как у всех переходов проекта
   // порог состояния — середина зоны STRETCH (px макета): как у порога
@@ -149,10 +165,13 @@
   // переключение состояния: instant (инициализация, hash-превью) ставит
   // значение сразу, иначе — твин от текущего отображаемого p. Перезапуск
   // посреди анимации (порог перекрестили назад) без рывка: едет от
-  // текущего p
+  // текущего p. На время форвард-твина на обёртке висит .sci-expanding —
+  // стык вниз (js/tdgates.js) ждёт его: перехват колеса срезал бы вуалью
+  // недоигравший разворот, и фулскрин «вопросы» не показался бы целиком
   function setState(to, instant) {
     target = to;
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    pin.classList.toggle('sci-expanding', !instant && to === 1 && to !== p);
     if (instant || target === p) { paint(target); return; }
     from = p;
     t0 = performance.now();
@@ -163,7 +182,7 @@
     const k = Math.min((now - t0) / DUR, 1);
     paint(from + (target - from) * ease(k));
     if (k < 1) raf = requestAnimationFrame(step);
-    else { raf = 0; paint(target); }
+    else { raf = 0; pin.classList.remove('sci-expanding'); paint(target); }
   }
 
   // пин секции (как no-tl ветка teardown.js): на зоне перехода сдвиг
@@ -180,8 +199,12 @@
     const offset = Math.min(Math.max(y - pinTop(), -FADE * s), TAIL * s);
     if (offset === 0) sec.style.transform = '';
     else sec.style.transform = 'translateY(' + (offset / s) + 'px)';
-    const want = y - pinTop() >= TRIGGER * s ? 1 : 0;
-    if (instant) setState(want, true);
+    const want = EXPAND && y - pinTop() >= TRIGGER * s ? 1 : 0;
+    // скролл дошёл до границы release (offset упёрся в TAIL), пока форвард-твин
+    // ещё играет: доигрываем мгновенно — фулскрин-состояние обязано
+    // устояться до того, как секция поедет со страницей (иначе рывок p)
+    if (want === 1 && raf && y - pinTop() >= TAIL * s) setState(1, true);
+    else if (instant) setState(want, true);
     else if (want !== target) setState(want, false);
   }
 
@@ -197,6 +220,11 @@
   window.addEventListener('scroll', function () { scrub(false); }, { passive: true });
   window.addEventListener('resize', function () { scrub(false); });
   window.addEventListener('load', function () { scrub(false); });
+  // при выключенном развороте хвост пина (STRETCH+HOLD) не нужен: секция
+  // заканчивается своим экраном, иначе ниже оставались бы 1664px мёртвого
+  // скролла. Высоту режем здесь, а не в css, чтобы выключатель был один —
+  // флаг EXPAND (css-значение 2496 остаётся эталоном включённого состояния)
+  if (!EXPAND && pin) pin.style.height = '832px';
   scrub(true); // стартовое состояние — без анимации (в т.ч. после restore)
 
   // превью фулскрин-экрана без прокрутки: #sci-step2 — середина стоянки
@@ -205,7 +233,9 @@
   // туда, как у всех хэш-превью проекта
   function hashJump() {
     if (!pin || !/^#sci-step2$/.test(location.hash)) return;
-    window.scrollTo(0, Math.round(pinTop() + (STRETCH + HOLD / 2) * scale()));
+    // разворот выключен: стоянки фулскрина нет — #sci-step2 показывает
+    // панельное состояние (верх пина), а не уезжает в разбор поста
+    window.scrollTo(0, Math.round(pinTop() + (EXPAND ? (STRETCH + HOLD / 2) : 0) * scale()));
     scrub(true);
   }
   hashJump();

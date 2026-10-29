@@ -8,7 +8,6 @@
   const RESERVE = 1;  // запасные щелчки на чёрном виджете
   let step = 0;       // 0..MAX
   let hold = 0;       // 0..RESERVE
-  let fading = false;
 
   const pinEl = statement.parentElement;
   const dotMain = statement.querySelector('.dot-white:not(.dot-piece)');
@@ -239,65 +238,29 @@
     return y > 4 && y <= stTopS() + 4;
   }
 
-  // белая вуаль на весь вьюпорт
-  function veil(opacity, ms, cb) {
-    let v = document.getElementById('white-veil');
-    if (opacity === 0) {
-      if (!v) { if (cb) cb(); return; }
-      v.style.transition = 'opacity ' + ms + 'ms ease-out';
-      v.getBoundingClientRect();
-      v.style.opacity = '0';
-      setTimeout(function () { v.remove(); if (cb) cb(); }, ms + 40);
-      return;
-    }
-    if (!v) {
-      v = document.createElement('div');
-      v.id = 'white-veil';
-      v.style.cssText = 'position:fixed;inset:0;z-index:999;background:#fff;opacity:0;pointer-events:none;';
-      document.body.appendChild(v);
-    }
-    v.style.transition = 'opacity ' + ms + 'ms ease-out';
-    v.getBoundingClientRect();
-    v.style.opacity = '1';
-    setTimeout(function () { if (cb) cb(); }, ms + 40);
-  }
-
-  // переходы героя и второго экрана — только через белый
+  // переходы героя и второго экрана — только через белую вуаль.
+  // Вуаль/шаблон перехода/дебаунс/гашение инерции — общие, см. js/fades.js
+  // (sidesinstant/sidesnatural там же: бока переключаются под непрозрачной
+  // вуалью и темнеют/светлеют ОДНОВРЕМЕННО со всем экраном — reveal
+  // показывает их одним цветом с экраном)
   function fadeForward() {
-    if (fading) return;
-    fading = true;
-    veil(1, 250, function () {
-      window.scrollTo(0, stTopS());
-      if (!supportsTimeline) applyProgress();
-      veil(0, 400, function () { fading = false; });
+    Fades.fade(stTopS, 400, {
+      jump: function () { if (!supportsTimeline) applyProgress(); }
     });
   }
   function fadeBack() {
-    if (fading) return;
-    fading = true;
-    veil(1, 250, function () {
-      window.scrollTo(0, 0);
-      veil(0, 300, function () { fading = false; });
-    });
+    Fades.fade(function () { return 0; }, 300);
   }
 
   // герой: вниз — виджеты, запас, переход; вверх — всё зеркально.
   // дальше скролл нативный: он сам рулит элементами второго экрана
-  let last = 0;
-  function gate(e) {
-    if (performance.now() - last < 250) return false;
-    if (Math.abs(e.deltaY) < 20) return false;
-    last = performance.now();
-    return true;
-  }
-
   window.addEventListener('wheel', function (e) {
-    if (fading) { e.preventDefault(); return; }
+    if (Fades.damp(e)) return;
     const fwd = e.deltaY > 0;
     if (fwd) {
       if (!atTop()) return;
       e.preventDefault();
-      if (!gate(e)) return;
+      if (!Fades.gate(e)) return;
       if (step < MAX) { step++; sync(); }
       else if (hold < RESERVE) { hold++; }
       else { fadeForward(); }
@@ -306,7 +269,7 @@
     if (atTop()) {
       if (hold > 0 || step > 0) {
         e.preventDefault();
-        if (gate(e)) {
+        if (Fades.gate(e)) {
           if (hold > 0) { hold--; } else { step--; sync(); }
         }
       }
@@ -314,12 +277,12 @@
     }
     if (atStatementStart()) {
       e.preventDefault();
-      if (gate(e)) fadeBack();
+      if (Fades.gate(e)) fadeBack();
     }
   }, { passive: false });
 
   window.addEventListener('keydown', function (e) {
-    if (fading) { e.preventDefault(); return; }
+    if (Fades.isFading()) { e.preventDefault(); return; }
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
       if (!atTop()) return;
       e.preventDefault();

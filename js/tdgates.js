@@ -2,8 +2,8 @@
   // Гейты разбора поста «Учёные доказали: [X]»: оба стыка секции —
   // вход с тёмного фулскрина «вопросы» (хвост пина учёных) и выход с
   // оранжевого вердикта на чек-лист — переходят через белую вуаль,
-  // в обе стороны. Та же механика, что у fadeForward/fadeBack в
-  // js/hero.js и у гейтов мобильной версии; кроссфейд карточки 04 →
+  // в обе стороны. Та же механика, что у fade-переходов героя
+  // (js/fades.js) и у гейтов мобильной версии; кроссфейд карточки 04 →
   // панель учёных (js/cards.js) закрывает стык выше, здесь закрыт
   // последний «слайд» на пути секции.
   //
@@ -45,83 +45,18 @@
   // низ обёртки = верх чек-листа (следующей секции) — округляем так же
   function clTop() { return Math.round(tdPin.getBoundingClientRect().bottom + window.scrollY); }
 
-  let fading = false;  // идёт жестовый fade (колесо/клавиши)
-  let last = 0;        // дебаунс жеста — как gate() в js/hero.js
   let coolUntil = 0;   // пауза fallback'а: перетаскивание скроллбара
                        // выставляет позицию каждый тик и «оспаривало» бы прыжок
 
-  function gate(e) {
-    if (performance.now() - last < 250) return false;
-    if (Math.abs(e.deltaY) < 20) return false;
-    last = performance.now();
-    return true;
-  }
-
-  // белая вуаль — тот же приём, что в js/hero.js; id тот же: элемент
-  // один на страницу, а зоны перехвата скриптов не пересекаются
-  function veil(opacity, ms, cb) {
-    let v = document.getElementById('white-veil');
-    if (opacity === 0) {
-      if (!v) { if (cb) cb(); return; }
-      v.style.transition = 'opacity ' + ms + 'ms ease-out';
-      v.getBoundingClientRect();
-      v.style.opacity = '0';
-      setTimeout(function () { v.remove(); if (cb) cb(); }, ms + 40);
-      return;
-    }
-    if (!v) {
-      v = document.createElement('div');
-      v.id = 'white-veil';
-      v.style.cssText = 'position:fixed;inset:0;z-index:999;background:#fff;opacity:0;pointer-events:none;';
-      document.body.appendChild(v);
-    }
-    v.style.transition = 'opacity ' + ms + 'ms ease-out';
-    v.getBoundingClientRect();
-    v.style.opacity = '1';
-    setTimeout(function () { if (cb) cb(); }, ms + 40);
-  }
-
-  // вуаль без фазы ввоза: слайд уже начался — под полупрозрачной вуалью
-  // он был бы виден, поэтому укрытие мгновенное, reveal обычный
-  function veilNow(cb) {
-    let v = document.getElementById('white-veil');
-    if (!v) {
-      v = document.createElement('div');
-      v.id = 'white-veil';
-      v.style.cssText = 'position:fixed;inset:0;z-index:999;background:#fff;pointer-events:none;';
-      document.body.appendChild(v);
-    }
-    v.style.transition = 'none';
-    v.getBoundingClientRect();
-    v.style.opacity = '1';
-    if (cb) cb();
-  }
-
-  // переход через вуаль: цель прыжка берём ФУНКЦИЕЙ и измеряем в момент
-  // прыжка — за 250 мс ввоза вуали layout может доехать (шрифты, картинки),
-  // как у всех измерений проекта
-  function fadeForwardTo(getTarget) {
-    if (fading) return;
-    fading = true;
-    veil(1, 250, function () {
-      window.scrollTo(0, getTarget());
-      veil(0, 400, function () { fading = false; });
-    });
-  }
-  function fadeBackTo(getTarget) {
-    if (fading) return;
-    fading = true;
-    veil(1, 250, function () {
-      window.scrollTo(0, getTarget());
-      veil(0, 300, function () { fading = false; });
-    });
-  }
+  // Вуаль, шаблон fade-перехода, дебаунс gate() и гашение инерции — общие
+  // с js/hero.js, живут в js/fades.js (подключён раньше всех потребителей)
 
   // Зоны перехвата (px скролла, S — верх sci-пина, T — верх td-пина,
   // C — верх чек-листа):
   //  вниз из «вопросов» [S+STRETCH, T): вся стоянка фулскрина и слайд под
   //    ней — любой жест вниз значит «уйти к разбору», прыжок на начало
-  //    пина табов (позиция #td-step0);
+  //    пина табов (позиция #td-step0); исключение — пока играет твин
+  //    разворота (.sci-expanding), тогда жест нативный (см. expanding());
   //  вверх из публикации (S+STRETCH+HOLD, T+4]: слайд и первые пиксели s0;
   //    глубже в табы колесо не перехватываем — там свои переходы-полосы;
   //  вниз из вердикта [T+TD_PIN, C): запас (вердикт уже собран) и слайд —
@@ -146,25 +81,39 @@
     };
   }
 
+  // Гашение инерции тачпада при fade-переходах — общее с js/hero.js,
+  // см. js/fades.js (damp(): колесо глотается во время вуали и на её
+  // хвосте — хвост инерции иначе докручивает табы teardown.js или
+  // запускает следующий гейт)
+  //
+  // Уступание развороту: пока на sci-пине висит .sci-expanding (форвард-твин
+  // растяжки маски ещё играет — класс ставит js/scientists.js), стык вниз
+  // НЕ перехватываем: жест уходит в нативный скролл, вуаль не срезает
+  // недоигравший разворот, и фулскрин «вопросы» показывается целиком.
+  // Следующий жест после завершения твина уже выходит на разбор. Fallback
+  // на y >= aUp не ждёт: там секция уже отпускается — прятать нечего
+  function expanding() { return sciPin.classList.contains('sci-expanding'); }
+
   window.addEventListener('wheel', function (e) {
-    if (fading) { e.preventDefault(); return; }
+    if (Fades.damp(e)) return;
     const z = zones();
     const y = window.scrollY;
     if (e.deltaY > 0) {
       if (y >= z.aDown && y < z.T) {
+        if (expanding()) return;
         e.preventDefault();
-        if (gate(e)) fadeForwardTo(tdTop);
+        if (Fades.gate(e)) Fades.fade(tdTop, 400);
       } else if (y >= z.bDown && y < z.C) {
         e.preventDefault();
-        if (gate(e)) fadeForwardTo(clTop);
+        if (Fades.gate(e)) Fades.fade(clTop, 400);
       }
     } else {
       if (y > z.aUp && y <= z.T + 4) {
         e.preventDefault();
-        if (gate(e)) fadeBackTo(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); });
+        if (Fades.gate(e)) Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 300);
       } else if (y > z.bUp && y <= z.C + 4) {
         e.preventDefault();
-        if (gate(e)) fadeBackTo(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); });
+        if (Fades.gate(e)) Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 300);
       }
     }
   }, { passive: false });
@@ -173,16 +122,16 @@
   // как в js/hero.js. preventDefault обязателен: нативный скролл
   // стрелками/пробелом должен стоять, пока вуаль прыгает
   window.addEventListener('keydown', function (e) {
-    if (fading) { e.preventDefault(); return; }
+    if (Fades.isFading()) { e.preventDefault(); return; }
     const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ';
     const up = e.key === 'ArrowUp' || e.key === 'PageUp';
     if (!down && !up) return;
     const z = zones();
     const y = window.scrollY;
-    if (down && y >= z.aDown && y < z.T) { e.preventDefault(); fadeForwardTo(tdTop); }
-    else if (down && y >= z.bDown && y < z.C) { e.preventDefault(); fadeForwardTo(clTop); }
-    else if (up && y > z.aUp && y <= z.T + 4) { e.preventDefault(); fadeBackTo(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }); }
-    else if (up && y > z.bUp && y <= z.C + 4) { e.preventDefault(); fadeBackTo(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }); }
+    if (down && y >= z.aDown && y < z.T) { if (expanding()) return; e.preventDefault(); Fades.fade(tdTop, 400); }
+    else if (down && y >= z.bDown && y < z.C) { e.preventDefault(); Fades.fade(clTop, 400); }
+    else if (up && y > z.aUp && y <= z.T + 4) { e.preventDefault(); Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 300); }
+    else if (up && y > z.bUp && y <= z.C + 4) { e.preventDefault(); Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 300); }
   });
 
   // fallback для скроллбара и не перехваченного нативного скролла: вход
@@ -196,7 +145,7 @@
     const y = window.scrollY;
     const prev = prevY;
     prevY = y;
-    if (fading || performance.now() < coolUntil) return;
+    if (Fades.isFading() || performance.now() < coolUntil) return;
     const z = zones();
     let target = null;
     if (y >= z.aUp && y < z.T) {
@@ -206,9 +155,12 @@
     }
     if (!target) return;
     coolUntil = performance.now() + 600;
-    veilNow(function () {
+    // fallback-вуаль — тоже fade-переход: хвост инерции после прыжка
+    // глотаем тем же окном, что и у жестовых fade (Fades.quiet)
+    Fades.quiet(Fades.GAP);
+    Fades.veilNow(function () {
       window.scrollTo(0, target());
-      veil(0, 400);
+      Fades.veil(0, 400);
     });
   }, { passive: true });
 })();

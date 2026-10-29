@@ -23,6 +23,12 @@
   // пороги состояний считаем в пикселях скролла
   function calibrate() {
     const s = scale();
+    // вылет чёрной панели в боковое поле окна (--td-bleed в css): на широких
+    // экранах колонка центрируется с полями (scale вписывает по высоте), и
+    // панель должна доходить до настоящего левого края экрана. Ширина поля
+    // в px макета; на вписанных по ширине окнах поле нулевое
+    const bleed = Math.max(0, (document.documentElement.clientWidth - 1280 * s) / 2 / s);
+    pin.style.setProperty('--td-bleed', bleed.toFixed(2) + 'px');
     th1 = pinTop() + TRANS * s * 0.5;
     th2 = pinTop() + TRANS * s * 1.5;
     th3 = pinTop() + TRANS * s * 2.5;
@@ -31,7 +37,11 @@
     if (max <= 0) return;
     const a = pinTop() / max;
     const b = (pinTop() + (PIN + RESERVE) * s) / max;
-    section.style.setProperty('animation-range', (a * 100).toFixed(3) + '% ' + (b * 100).toFixed(3) + '%');
+    // запись только при изменении: calibrate зовётся на каждом scroll
+    // (см. ниже), одинаковая строка не должна плодить мутаций стиля
+    const range = (a * 100).toFixed(3) + '% ' + (b * 100).toFixed(3) + '%';
+    if (section.style.getPropertyValue('animation-range') !== range)
+      section.style.setProperty('animation-range', range);
   }
 
   function syncState(y) {
@@ -42,7 +52,10 @@
     pin.classList.toggle('s3', st === 3);
   }
 
-  // ручной пин для браузеров без scroll-driven animations
+  // ручной пин для браузеров без scroll-driven animations: скраб = линейная
+  // ветка tdPin-анимации, translateY догоняет скролл весь диапазон
+  // (PIN+RESERVE, как to в @keyframes — экран приколот и на запасе
+  // вердикта), дальше замирает и секция уезжает сама
   function applyProgress() {
     const y = window.scrollY;
     syncState(y);
@@ -50,15 +63,31 @@
     const s = scale();
     const start = pinTop();
     if (y <= start) section.style.transform = '';
-    else if (y - start <= (PIN + RESERVE) * s) section.style.transform = 'translateY(' + (Math.min(y - start, PIN * s) / s) + 'px)';
-    else section.style.transform = 'translateY(' + PIN + 'px)';
+    else if (y - start <= (PIN + RESERVE) * s) section.style.transform = 'translateY(' + (Math.min(y - start, (PIN + RESERVE) * s) / s) + 'px)';
+    else section.style.transform = 'translateY(' + (PIN + RESERVE) + 'px)';
   }
 
   if (supportsTimeline) pin.classList.add('tl');
   calibrate();
-  window.addEventListener('scroll', applyProgress, { passive: true });
+  // calibrate и на scroll: высота документа доезжает ПОСЛЕ load — sci-pin
+  // режется в js/scientists.js (скрипт ниже по порядку), а слои боков
+  // js/sides.js на load перестраиваются ПОСЛЕ этого скрипта и до тех пор
+  // торчат ниже #page, завышая scrollHeight. Проценты animation-range —
+  // доли ТЕКУЩЕГО диапазона скролла: max, замеренный в момент, когда docH
+  // ещё старый, молча сдвигает весь пин (экран разбора «тонет» под
+  // вьюпорт — белая пустота, гейт выбрасывает на чек-лист). К первому
+  // scroll docH уже осел, строка выше не меняется — лишней записи нет
+  window.addEventListener('scroll', function () { calibrate(); applyProgress(); }, { passive: true });
   window.addEventListener('resize', function () { calibrate(); applyProgress(); });
-  window.addEventListener('load', function () { calibrate(); applyProgress(); });
+  window.addEventListener('load', function () {
+    calibrate(); applyProgress();
+    // повтор ПОСЛЕ чужих load-обработчиков: слои боков js/sides.js
+    // перестраиваются в rAF, отложенном на load, — первый rAF тут ещё
+    // соседний с ними, второй уже после перестройки, docH осел
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { calibrate(); applyProgress(); });
+    });
+  });
   applyProgress();
 
   // превью состояний без прокрутки: #td-step0 (публикация), 1 (контекст), 2 (первоисточник), 3 (вердикт)
@@ -74,6 +103,6 @@
   // шрифты (display=swap) доезжают после load и растят документ: прыжок по
   // хэшу уходит не туда — повторяем после готовности шрифтов
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () { hashJump(); applyProgress(); });
+    document.fonts.ready.then(function () { calibrate(); hashJump(); applyProgress(); });
   }
 })();
