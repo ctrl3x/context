@@ -83,10 +83,14 @@
 
   function sciPlaying() { return next.classList.contains('sci-anim-in') || next.classList.contains('sci-anim-out'); }
 
-  // пересчёт порога (дробный scale) + состояние из скролла без анимации:
+  // пересчёт порога + состояние из скролла без анимации:
   // вход на страницу, пересчёт layout, финал анимации
   function syncSci() {
-    sciTh = cardTop() + FADE * scale() * 0.5;
+    // порог округлён до целых: scrollTo работает в целых пикселях, и ловля
+    // пролёта (catchFlight) прыгает ровно на sciTh. Дробный порог давал бы
+    // стоянку на копейку НИЖЕ порога — эхо снапа ловилось бы повторно (уже
+    // с нулевой скоростью) и снимало бы удержание стоянки
+    sciTh = Math.round(cardTop() + FADE * scale() * 0.5);
     sciPin.classList.toggle('sci-on', window.scrollY >= sciTh);
   }
 
@@ -132,8 +136,62 @@
     want ? sciForward() : sciBack();
   }
 
-  window.addEventListener('scroll', function () { fadePin(); photoPin(); sciTick(); }, { passive: true });
+  // ── страховка от «наплыва» экрана учёных на экраны выше ────────────────
+  // Кроссфейд играет фиксированные 620 мс, а зону скролл проходит свободно:
+  // быстрый ход вверх выходит из зоны раньше фейда, и почти непрозрачный
+  // экран уезжает вместе со страницей — «наплывает» на экраны выше. Пока
+  // экран показан (.sci-on), страницу выше начала зоны (cardTop) не
+  // отпускаем: scroll-событие возвращает её на cardTop, где состав ещё
+  // статичен (оба экрана приколоты на всей зоне). Телепорт назад не виден:
+  // в момент возврата экран непрозрачен и накрывает вьюпорт, а карточка 04
+  // под ним приколота на тех же y. Фейд доигрывает над неподвижной
+  // карточкой, как задумано; sciTick при y = cardTop видит want=false и
+  // гасит экран (если фейд ещё не идёт), после снятия .sci-on зона
+  // отпускает страницу. Медленный скролл клампа не замечает: фейд
+  // успевает, пока страница доезжает до cardTop. Колёсный путь без дрожи:
+  // non-passive wheel-слушатель заставляет браузер применять прокрутку
+  // после хендлеров — промежуточная позиция не отрисовывается
+  function sciClamp() {
+    if (flight) return; // пролёт держит свою стоянку на пороге (catchFlight)
+    if (!sciPin.classList.contains('sci-on')) return;
+    if (window.scrollY >= cardTop()) return;
+    window.scrollTo(0, cardTop());
+  }
+
+  window.addEventListener('scroll', function () { sciClamp(); fadePin(); photoPin(); sciTick(); settleArm(); }, { passive: true });
   window.addEventListener('resize', function () { fadePin(); photoPin(); sciTick(); });
+
+  // ── дотяжка на покое: страница не должна застревать между карточками ────
+  // Хвост плавного скролла (wheel-события уже кончились, Chrome дотаивает
+  // анимацию сам) выезжает из-под клампа сразу после снятия .sci-on и может
+  // ОСТАНОВИТЬСЯ посреди карточки: «добив» в wheel-обработчике ловит только
+  // события, а их больше нет — экран замирает срезанным («поплыл»), виден
+  // соседний. Когда внутри ленты карточек скролл затих на 180 мс, а страница
+  // стоит не на верхней границе текущей карточки — снапим на неё: та же
+  // семантика, что у «добива» (syncIdx + topOf, допуск 4px от дробного
+  // scale). Вне ленты (выше zoneStart−4 или в зоне перехода y ≥ cardTop−4)
+  // не вмешиваемся: там рулевые sciClamp/sciTick и нативный стык со
+  // «стейтментом». Гварды sliding/flight/sci-on: пока позицию держат лента,
+  // пролёт или кроссфейд, дотяжка не вооружается вовсе — таймер перевооружается
+  // каждым scroll-событием, поэтому срабатывает только на настоящей тишине
+  let settleT = 0;
+  function settleArm() {
+    if (settleT) { clearTimeout(settleT); settleT = 0; }
+    if (sliding || flight || sciPlaying() || sciPin.classList.contains('sci-on')) return;
+    const y = window.scrollY;
+    if (y < zoneStart() - 4 || y >= cardTop() - 4) return;
+    syncIdx();
+    if (y <= topOf(cards[idx]) + 4) return; // уже на границе — нечего тянуть
+    settleT = setTimeout(function () {
+      settleT = 0;
+      // за тишину могло всё поменяться — перечитываем состояние и layout
+      if (sliding || flight || sciPlaying() || sciPin.classList.contains('sci-on')) return;
+      const y2 = window.scrollY;
+      if (y2 < zoneStart() - 4 || y2 >= cardTop() - 4) return;
+      syncIdx();
+      window.scrollTo(0, topOf(cards[idx]));
+    }, 180);
+  }
 
   // лента: A уезжает влево/вправо, B въезжает с противоположной стороны,
   // в конце мгновенный скролл на targetY и сброс трансформов
@@ -203,7 +261,13 @@
   let used = false;   // жест уже потрачен (добив или лента)
   function noteWheel() {
     const now = performance.now();
-    if (now - lastWheelAt > 120) { used = false; }
+    if (now - lastWheelAt > 120) {
+      used = false;
+      // новый жест или инерция кончились: висящий флаг пролёта снимаем —
+      // иначе он поймает и следующий медленный подход к экрану (а если
+      // пролёт умер, не доехав до порога, то sciTick навсегда заблокирован)
+      flight = false;
+    }
     lastWheelAt = now;
   }
 
@@ -212,6 +276,7 @@
   // поэтому «новый жест» по паузам он обманывает, а признак покоя — нет
   let lastScrollAt = 0;
   let lastScrollY = window.scrollY;
+  let lastScrollT = 0; // время прошлого scroll-события — для скорости пролёта
   function noteScroll() { lastScrollAt = performance.now(); }
 
   // ловушка пролёта: свайп вверх с нижних экранов нативно проносит страницу
@@ -220,21 +285,48 @@
   // порог: страница останавливается на экране «Учёные доказали» (состояние
   // не менялось — кроссфейд не дёргается), дальше наверх пользователь
   // уходит уже осознанным жестом через честный fade. Пока пролёт едет
-  // снизу (y > порога), не мешаем: нативный скролл
-  function catchFlight() {
+  // снизу (y > порога), не мешаем: нативный скролл.
+  //
+  // Флаг после ловли НЕ снимается: scrollTo инерцию не гасит, и её хвост
+  // нативно проносил бы страницу сквозь зону — экран учёных уезжал бы
+  // вместе с ней, «наплывая» на экраны выше (sciTick флагом заблокирован,
+  // кроссфейд не стартует). Стоянку держим, ПОКА пролёт быстрый: скорость
+  // хода меряем по соседним scroll-событиям (px/ms), и когда хвост
+  // инерции растягивается медленнее порога — отпускаем: дальше медленный
+  // дрейф вверх зарабатывает честный кроссфейд (sciTick), и фейд за ним
+  // успевает. Дрожь позиций во время стоянки не видна: экран учёных
+  // приколот и накрывает вьюпорт целиком. Тишина 150 мс после последней
+  // ловли значит, что пролёт кончился совсем, — флаг снимается и без
+  // «медленного» события (иначе уцепившийся флаг ловил бы и следующий
+  // медленный подход к экрану)
+  const CATCH_V = 1; // порог скорости пролёта, px/ms (~1000 px/s — точно инерция)
+  let holdT = 0;     // таймер тишины после последней ловли пролёта
+  function catchFlight(v) {
     if (!flight) return;
-    if (window.scrollY >= sciTh) return;
+    const y = window.scrollY;
+    if (y >= sciTh) return;
     window.scrollTo(0, sciTh);
-    flight = false;
+    if (holdT) { clearTimeout(holdT); holdT = 0; }
+    if (v >= CATCH_V) {
+      holdT = setTimeout(function () { holdT = 0; flight = false; }, 150);
+    } else {
+      flight = false;
+    }
   }
 
   window.addEventListener('scroll', function () {
+    const now = performance.now();
     noteScroll();
-    // пролёт ловится только на ходу вверх; любое движение вниз или остановка
-    // ниже порога сбрасывают флаг — иначе sciTick навсегда заблокирован
-    if (window.scrollY > lastScrollY) flight = false;
+    // скорость хода вверх с прошлого события: меряем ТОЛЬКО по настоящему
+    // движению (снап отражается событием с y = sciTh — там y не убывал)
+    const v = lastScrollT && window.scrollY < lastScrollY
+      ? (lastScrollY - window.scrollY) / Math.max(now - lastScrollT, 1) : 0;
+    lastScrollT = now;
+    // реальное движение вниз ниже порога сбрасывает флаг — иначе sciTick
+    // навсегда заблокирован; снап вверх до sciTh движением вниз не считается
+    if (window.scrollY > lastScrollY && window.scrollY > sciTh) flight = false;
     lastScrollY = window.scrollY;
-    catchFlight();
+    catchFlight(v);
   }, { passive: true });
   function syncIdx() {
     const y = window.scrollY;

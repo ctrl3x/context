@@ -28,6 +28,19 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   });
 })();
 </script>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113902020', 'ym');
+
+    ym(113902020, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113902020" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </head>
 <body>
 <div id="page">
@@ -252,7 +265,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
   </div>
   <h3 class="card-h">Навредить здоровью</h3>
-  <p class="card-p">Если человек поверит «научно доказанному» методу лечения, то это может привести к отказу от реальной медицины в пользу исследования из блога</p>
+  <p class="card-p" style="width:340px;">Если человек поверит «научно доказанному» методу лечения, то это может привести к отказу от реальной медицины в пользу исследования из блога</p>
 </section>
 
 <!-- 6b. CARD 02 -->
@@ -353,9 +366,10 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <p class="td-lead">разбор поста из медиа:</p>
 
     <!-- пост с метками — цельный SVG-экспорт слоя из макета (Group 492,
-         2010:1023, (491;242) 605×299): текст поста + оранжевые метки
+         2010:1023, в макете (491;242) 605×299): текст поста + оранжевые метки
          СТРАХ/МАГИЯ/МИФ с коннекторами вшиты в файл, поэтому HTML-метки
-         .tag-label удалены — они бы дублировали вшитые -->
+         .tag-label удалены — они бы дублировали вшитые.
+         На странице позицию задаёт CSS: центр видимого окна таба -->
     <img class="td-article-img" src="assets/svg/article.svg" alt="пост с метками страх, магия, миф">
   </div>
 
@@ -401,7 +415,11 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края).
        Обёртка-окно .td-vd-clip: секция overflow:visible (панель выезжает
        в боковое поле), а оранжевый фон при сдвиге ±60px рисовал бы за
-       правым краем холста — единственный слой с непрозрачным фоном -->
+       правым краем холста — единственный слой с непрозрачным фоном.
+       На вердикте (s3) окно расширяется на вылет --td-bleed в обе стороны:
+       оранжевый заливает окно от края до края (слой растягивается вместе
+       с клипом — он inset:0 от клипа, контент остаётся лево-якорным),
+       а стек табов уезжает влево до настоящего левого края окна -->
   <div class="td-vd-clip">
   <div class="td-view td-vd">
     <p class="vd-main">Выводы искажены и преувеличены</p>
