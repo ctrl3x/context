@@ -3,13 +3,26 @@
   // вход с тёмного фулскрина «вопросы» (хвост пина учёных) и выход с
   // оранжевого вердикта на чек-лист — переходят через белую вуаль,
   // в обе стороны. Та же механика, что у fade-переходов героя
-  // (js/fades.js) и у гейтов мобильной версии; кроссфейд карточки 04 →
-  // панель учёных (js/cards.js) закрывает стык выше, здесь закрыт
-  // последний «слайд» на пути секции.
+  // (js/fades.js), у пары fade-гейтов вокруг экрана учёных (js/cards.js)
+  // и у гейтов мобильной версии; здесь закрыт последний «слайд» на пути
+  // секции.
   //
-  // Почему вуаль поверх готовых пинов, а не кроссфейд-зона как у
-  // 04 → учёные: стыки зажаты между хвостом пина учёных (кламп scrub
-  // в js/scientists.js) и пином табов (js/teardown.js) — удлинение
+  // СТЫК ВХОДА СЕЙЧАС НЕАКТИВЕН: разворот маски выключен (EXPAND=false
+  // в js/scientists.js), стоянки «вопросов» нет, и стык «экран учёных →
+  // разбор» перехватывает зеркальный fade-гейт в js/cards.js (sci-flat).
+  // В flat зоны первого стыка глушатся флагом flat(), а не «вырождением
+  // по арифметике»: aUp считается от ОКРУГЛЕННОГО S (topOf), T — от точной
+  // кромки пина, и пыль округления при дробном scale оставляет up-зону
+  // (aUp, T+4] живой ровно на стоянке разбора y=T. Колёса там обычно уже
+  // проглочены держаком cards.js, но preventDefault не отменяет чужих
+  // слушателей — гейт играл fade на aBack (стоянку «вопросов», в flat это
+  // середина слайда выхода: экран учёных наполовину уехал за кромку).
+  // Код оставлен для возврата разворота: константы STRETCH/HOLD синхронны
+  // с js/scientists.js.
+  //
+  // Почему вуаль поверх готовых пинов, а не ещё одна зона-слайд с
+  // собственной геометрией: стыки зажаты между хвостом пина учёных
+  // (scrub в js/scientists.js) и пином табов (js/teardown.js) — удлинение
   // любого пина сдвинуло бы пороги табов и хребты катышей ниже по
   // странице. Поэтому 832px «слайда» на каждом стыке остаются
   // нативным скролл-запасом (скроллбар проезжает их как раньше), а
@@ -94,12 +107,19 @@
   // на y >= aUp не ждёт: там секция уже отпускается — прятать нечего
   function expanding() { return sciPin.classList.contains('sci-expanding'); }
 
+  // режим «разворот выключен» (класс ставит js/scientists.js — скрипт выше
+  // по порядку подключения, но читаем лениво на каждом жесте, как sciFlat()
+  // в js/cards.js): первый стык целиком принадлежит зеркальному fade-гейту
+  // js/cards.js, здесь он мёртв. Почему флаг, а не вырождение зон, — шапка
+  // файла (пыль округления при дробном scale оставляет up-зону живой)
+  function flat() { return sciPin.classList.contains('sci-flat'); }
+
   window.addEventListener('wheel', function (e) {
     if (Fades.damp(e)) return;
     const z = zones();
     const y = window.scrollY;
     if (e.deltaY > 0) {
-      if (y >= z.aDown && y < z.T) {
+      if (!flat() && y >= z.aDown && y < z.T) {
         if (expanding()) return;
         e.preventDefault();
         if (Fades.gate(e)) Fades.fade(tdTop, 400);
@@ -108,12 +128,12 @@
         if (Fades.gate(e)) Fades.fade(clTop, 400);
       }
     } else {
-      if (y > z.aUp && y <= z.T + 4) {
+      if (!flat() && y > z.aUp && y <= z.T + 4) {
         e.preventDefault();
-        if (Fades.gate(e)) Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 300);
+        if (Fades.gate(e)) Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 400);
       } else if (y > z.bUp && y <= z.C + 4) {
         e.preventDefault();
-        if (Fades.gate(e)) Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 300);
+        if (Fades.gate(e)) Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 400);
       }
     }
   }, { passive: false });
@@ -128,10 +148,10 @@
     if (!down && !up) return;
     const z = zones();
     const y = window.scrollY;
-    if (down && y >= z.aDown && y < z.T) { if (expanding()) return; e.preventDefault(); Fades.fade(tdTop, 400); }
+    if (down && !flat() && y >= z.aDown && y < z.T) { if (expanding()) return; e.preventDefault(); Fades.fade(tdTop, 400); }
     else if (down && y >= z.bDown && y < z.C) { e.preventDefault(); Fades.fade(clTop, 400); }
-    else if (up && y > z.aUp && y <= z.T + 4) { e.preventDefault(); Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 300); }
-    else if (up && y > z.bUp && y <= z.C + 4) { e.preventDefault(); Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 300); }
+    else if (up && !flat() && y > z.aUp && y <= z.T + 4) { e.preventDefault(); Fades.fade(function () { return sciTop() + (STRETCH + HOLD / 2) * scale(); }, 400); }
+    else if (up && y > z.bUp && y <= z.C + 4) { e.preventDefault(); Fades.fade(function () { return tdTop() + (TD_PIN + RESERVE / 2) * scale(); }, 400); }
   });
 
   // fallback для скроллбара и не перехваченного нативного скролла: вход
@@ -148,7 +168,7 @@
     if (Fades.isFading() || performance.now() < coolUntil) return;
     const z = zones();
     let target = null;
-    if (y >= z.aUp && y < z.T) {
+    if (!flat() && y >= z.aUp && y < z.T) {
       target = prev < z.aUp ? tdTop : (prev >= z.T ? function () { return z.aBack; } : null);
     } else if (y >= z.bUp && y < z.C) {
       target = prev < z.bUp ? clTop : (prev >= z.C ? function () { return z.bBack; } : null);

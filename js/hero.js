@@ -249,7 +249,7 @@
     });
   }
   function fadeBack() {
-    Fades.fade(function () { return 0; }, 300);
+    Fades.fade(function () { return 0; }, 400);
   }
 
   // герой: вниз — виджеты, запас, переход; вверх — всё зеркально.
