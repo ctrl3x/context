@@ -607,7 +607,9 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 <!-- 12. FINALE: обёртка .fin-pin — пин хвоста, высоту добирает js/decor.js -->
 <div class="fin-pin">
 <section class="sec sec-finale">
-  <p class="h40 fin-lead caps">именно поэтому появляется решение</p>
+  <!-- h2, а не p: .sec p красит все абзацы в Arsenal (специфичность выше .h40),
+       а по макету 1779:952 обе фразы — IBM Plex Mono Regular -->
+  <h2 class="h40 fin-lead caps">именно поэтому появляется решение</h2>
 
   <div class="widget w-orange" style="left:840px;top:85px;">
     <div class="widget-head"><span>{}</span><svg class="wx" width="14" height="14" viewBox="0 0 14 14"><path d="M1 1 L13 13 M13 1 L1 13" stroke="currentColor" stroke-width="1"/></svg></div>
@@ -624,7 +626,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
     <div class="widget-note">Он проверяет громкие новости/утверждения, и помогает отличить подтверждённые факты от преувеличений/манипуляций/фейков.</div>
   </div>
 
-  <p class="h40 fin-right caps">в виде сервиса</p>
+  <h2 class="h40 fin-right caps">в виде сервиса</h2>
 
   <hr class="orange-rule" style="top:560px;">
   <!-- логотип-тикер: та же анимация, что у «ИЗУЧАЙТЕ [КОНТЕКСТ]» в чек-листе —
