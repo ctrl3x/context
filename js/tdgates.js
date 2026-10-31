@@ -114,7 +114,28 @@
   // файла (пыль округления при дробном scale оставляет up-зону живой)
   function flat() { return sciPin.classList.contains('sci-flat'); }
 
+  // Пролёт сквозь табы: жест вниз из области табов (нативные 2400px пина над
+  // запасом) докатывается до запаса вердикта инерцией — очередь wheel с
+  // паузами < 120 мс (см. noteWheel в js/cards.js). Без ловли первое же
+  // догоняющее событие в зоне выхода играло fade на чек-лист: вердикт мелькал и
+  // сразу гас — «таб ВЕРДИКТ пролистывается по инерции». Ловим: пока очередь
+  // жеста жива, колёса вниз в зоне глотаются (preventDefault гасит нативную
+  // инерцию, экран приколот — останов невидим), страница стоит на вердикте;
+  // уход на чек-лист — только НОВЫМ жестом (пауза > 120 мс). Вверх движение
+  // пролёт снимает (пользователь отмотал — табы крутятся нативно), потолок
+  // HOLD_MAX — по образцу держака js/cards.js: непрерывная протяжка без пауз
+  // не держит зону мёртвой дольше 2.5 с
+  const HOLD_MAX = 2500;
+  let lastWheelAt = 0;
+  let flight = false;
+  let flightUntil = 0;
+
   window.addEventListener('wheel', function (e) {
+    // часы жеста тикают до всех глоталок (как noteWheel в js/cards.js):
+    // проглоченные damp/flight события всё ещё длительность жеста
+    const now = performance.now();
+    if (now - lastWheelAt > 120 || now > flightUntil) flight = false;
+    lastWheelAt = now;
     if (Fades.damp(e)) return;
     const z = zones();
     const y = window.scrollY;
@@ -123,8 +144,15 @@
         if (expanding()) return;
         e.preventDefault();
         if (Fades.gate(e)) Fades.fade(tdTop, 400);
+      } else if (y >= z.T && y < z.bDown) {
+        // нативный скролл табов (пороги рулят состояниями); сам жест
+        // запоминается как пролёт — если он докатится до запаса вердикта,
+        // его хвост будет поглощён в ветке зоны выхода
+        flight = true;
+        flightUntil = now + HOLD_MAX;
       } else if (y >= z.bDown && y < z.C) {
         e.preventDefault();
+        if (flight) return; // хвост пролёта: глотаем до конца жеста
         if (Fades.gate(e)) Fades.fade(clTop, 400);
       }
     } else {
@@ -165,6 +193,10 @@
     const y = window.scrollY;
     const prev = prevY;
     prevY = y;
+    // реальное движение вверх снимает пролёт: пользователь отмотал табы —
+    // дальше вниз он поедет только новым жестом (как сброс flight в
+    // scroll-пине js/cards.js)
+    if (y < prev) flight = false;
     if (Fades.isFading() || performance.now() < coolUntil) return;
     const z = zones();
     let target = null;

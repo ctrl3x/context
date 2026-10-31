@@ -227,14 +227,13 @@ html, body {
 }
 .m-pg--on { background: var(--gray); border-color: var(--gray); }
 
-/* статичный кадр тикера [Контекст]: скобки — Roboto Mono,
-   буквы — Plex Mono с раздвинутым трекингом (кадр из мокапа) */
-/* мелкий тикер карточки: в мокапе «контекст» строчными */
+/* статичный кадр тикера [КОНТЕКСТ]: скобки — Roboto Mono,
+   буквы — Plex Mono с раздвинутым трекингом (капс — как на десктопе,
+   в мокапе было строчными, сознательно отклоняемся) */
 .m-tick {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px; font-weight: 500; line-height: 1;
   letter-spacing: 0.16em;
-  text-transform: lowercase;
   color: var(--gray);
   white-space: nowrap;
 }

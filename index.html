@@ -14,7 +14,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Arsenal:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Arsenal:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@200;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <script>
 (function () {
@@ -246,6 +246,16 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 <!-- 5. BLACK STATEMENT 2 -->
 <section class="sec sec-dark sec-statement2">
   <p class="statement-40 center w894">Если научный тезис может убедить,<br>он может и ввести в заблуждение</p>
+
+  <!-- скобки-тикер (мокап 1779-928): та же механика, что у гигант-лого финала
+       (.giant-ctx), но раскрытие из центра — скобки сомкнуты чернилами
+       в середине экрана, по классу .in на секции (вешает js/statement.js,
+       когда экран больше чем наполовину в кадре) разъезжаются в обе стороны,
+       а фраза раскрывается между ними — clip-path с обоих краёв на чернилах
+       скобок. Скобки белые ExtraLight —
+       позиции и начертание взяты с макета, см. css §2/5 -->
+  <span class="st2-br st2-br-l">[</span>
+  <span class="st2-br st2-br-r">]</span>
 </section>
 
 <!-- 6. CARDS WRAP: фиксированная фото-рука + 4 карточки-ленты -->
@@ -262,7 +272,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
   <div class="card-num">01</div>
   <div class="card-mini">
-    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+    <span class="br">[</span><span>КОНТЕКСТ</span><span class="br">]</span>
   </div>
   <h3 class="card-h">Навредить здоровью</h3>
   <p class="card-p" style="width:340px;">Если человек поверит «научно доказанному» методу лечения, то это может привести к отказу от реальной медицины в пользу исследования из блога</p>
@@ -276,7 +286,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
   <div class="card-num">02</div>
   <div class="card-mini">
-    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+    <span class="br">[</span><span>КОНТЕКСТ</span><span class="br">]</span>
   </div>
   <h3 class="card-h">Вызвать панику</h3>
   <p class="card-p" style="width:340px;">Если новость о «опасном» продукте или вирусе разлетится быстрее опровержения, то это может спровоцировать панику, скупку и реальный ущерб</p>
@@ -290,7 +300,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
   <div class="card-num">03</div>
   <div class="card-mini">
-    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+    <span class="br">[</span><span>КОНТЕКСТ</span><span class="br">]</span>
   </div>
   <h3 class="card-h">Распространить миф</h3>
   <p class="card-p" style="width:340px;">Если фейк с формулировкой «исследование показало» наберёт охваты, то это может превратить выдумку в «общеизвестный факт»</p>
@@ -304,7 +314,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
   <div class="card-num">04</div>
   <div class="card-mini">
-    <span class="br">[</span><span>К</span><span>о</span><span>н</span><span>т</span><span>е</span><span>к</span><span>с</span><span>т</span><span class="br">]</span>
+    <span class="br">[</span><span>КОНТЕКСТ</span><span class="br">]</span>
   </div>
   <h3 class="card-h">Управлять мнением</h3>
   <p class="card-p" style="width:340px;">Если громкое «исследование» появляется накануне важного решения, то это может продавить нужную точку зрения миллионам людей</p>
@@ -364,7 +374,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
   <!-- слой: ПУБЛИКАЦИЯ -->
   <div class="td-view td-pub">
-    <p class="td-lead">разбор поста из медиа:</p>
+    <p class="td-lead caps">разбор поста из медиа:</p>
 
     <!-- пост с метками — цельный SVG-экспорт слоя из макета (Group 492,
          2010:1023, в макете (491;242) 605×299): текст поста + оранжевые метки
@@ -377,40 +387,56 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
   <!-- слой: КОНТЕКСТ -->
   <div class="td-view td-ctx">
     <h3 class="td2-h" style="left:537px;top:110px;">ПОСТ ПЕРЕСКАЗЫВАЕТ СТАТЬЮ</h3>
-    <p class="td2-p td2-small" style="left:537px;top:156px;width:330px;">статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья</p>
+    <p class="td2-p td2-small" style="left:537px;top:156px;width:330px;">Статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья</p>
 
     <!-- схема перерисована в макете (1982:936): пилюля ПОСТ → «усиливает
          утверждение» → BBC Science Focus Magazine; экспорт 2x 518×368 -->
     <img class="td2-img" style="left:893px;top:110px;width:259px;height:184px;" src="assets/img/scheme.png" alt="схема: пост усиливает утверждение статьи">
 
     <h3 class="td2-h" style="left:537px;top:288px;">ЧТО УТВЕРЖДАЕТ ПОСТ</h3>
-    <p class="td2-p" style="left:537px;top:334px;width:451px;">«Негативные мысли буквально разрушают мозг изнутри»</p>
+    <!-- ширина 330 — как в макете (1982:926): цитата складывается в 2 строки,
+         «изнутри»» уходит на вторую -->
+    <p class="td2-p" style="left:537px;top:334px;width:330px;">«Негативные мысли буквально разрушают мозг изнутри»</p>
 
     <h3 class="td2-h" style="left:537px;top:414px;">ЧТО ГОВОРИТ НАУЧПОП СТАТЬЯ</h3>
-    <p class="td2-p" style="left:537px;top:460px;width:470px;">BBC Science Focus рассказывает о связи повторяющегося негативного<br>мышления с риском деменции и предполагает, что оно может<br>ускорять развитие заболевания.</p>
+    <!-- переносы — как в макете (1982:920): 4 строки; натуральный перенос
+         в 330px тащит «с» вверх (строка 2 длилась бы «…мышления с») -->
+    <p class="td2-p" style="left:537px;top:460px;width:330px;">BBC Science Focus рассказывает о связи<br>повторяющегося негативного мышления<br>с риском деменции и предполагает,<br>что оно может ускорять развитие заболевания.</p>
 
     <h3 class="td2-h" style="left:537px;top:580px;">ГДЕ ПОСТ ПРЕУВЕЛИЧИВАЕТ</h3>
-    <!-- переносы — как в макете (1982:923): каждое предложение с новой
-         строки, внутри предложений — жёсткие <br>; натуральный перенос
-         в 470px эти короткие строки («плохие мысли.») не повторяет -->
-    <p class="td2-p" style="left:537px;top:626px;width:470px;">«Повторяющееся негативное мышление» превращается в любые<br>плохие мысли.<br>«Может быть связано с риском» превращается в «приводит<br>к деменции».<br>Предположение о влиянии на мозг становится утверждением о его<br>буквальном разрушении.<br>Добавляется категоричный совет: «Думаем только о хорошем».</p>
+    <!-- переносы — как в макете (1982:923): предложения целиком, строка 3
+         кончается «буквальном». Жёсткие <br> обязательны: при 615px натуральный
+         перенос склеил бы строки (конец строки 1 + ««Может» ≈ 545px < 615,
+         конец строки 3 + «разрушении.» ≈ 551px < 615); ширина 615 — как
+         в макете, дальше правой стены окна таба -->
+    <p class="td2-p" style="left:537px;top:626px;width:615px;">«Повторяющееся негативное мышление» превращается в любые плохие мысли.<br>«Может быть связано с риском» превращается в «приводит к деменции».<br>Предположение о влиянии на мозг становится утверждением о его буквальном<br>разрушении. Добавляется категоричный совет: «Думаем только о хорошем».</p>
   </div>
 
-  <!-- слой: ПЕРВОИСТОЧНИК -->
+  <!-- слой: ПЕРВОИСТОЧНИК (мокап 1982:945). Дизайнер пересобрал вкладку:
+       блоки идут ГДЕ ГРАНИЦА (288) → ЧТО ГОВОРИТ ИССЛЕДОВАНИЕ (414) →
+       ЧТО ИСКАЖЕНО (580) -->
   <div class="td-view td-src">
     <h3 class="td2-h" style="left:583px;top:110px;">ПОСТ ПЕРЕСКАЗЫВАЕТ СТАТЬЮ</h3>
-    <p class="td2-p td2-small" style="left:583px;top:156px;width:314px;">статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья строится на результатах исследования</p>
+    <!-- ширина 330 — как у подписи в КОНТЕКСТЕ; «BBC … статья» помещается
+         строкой целиком, «строится…» — с новой строки (в макете 5 строк) -->
+    <p class="td2-p td2-small" style="left:583px;top:156px;width:330px;">Статья 2020 года<br>How to spot the subtle thinking pattern that can accelerate dementia<br>BBC Science Focus Magazine · научно-популярная статья<br>строится на результатах исследования</p>
 
-    <img class="td2-img" style="left:956px;top:110px;width:241px;height:253px;" src="assets/img/article.png" alt="скриншот статьи BBC Science Focus">
+    <!-- скриншот статьи ужат и сдвинут вправо (1982:983: 196×206 на 1002) -->
+    <img class="td2-img" style="left:1002px;top:110px;width:196px;height:206px;" src="assets/img/article.png" alt="скриншот статьи BBC Science Focus">
 
-    <h3 class="td2-h" style="left:583px;top:368px;">ЧТО ИСКАЖЕНО</h3>
-    <p class="td2-p" style="left:583px;top:414px;width:435px;">Статья рассказывает о научной <b>гипотезе</b>, связанной с повторяющимся негативным мышлением, но подводит читателя к более уверенному выводу о возможном ускорении деменции.</p>
+    <h3 class="td2-h" style="left:583px;top:288px;">ГДЕ ГРАНИЦА ДОКАЗАТЕЛЬСТВ</h3>
+    <p class="td2-p" style="left:583px;top:334px;width:330px;">Нельзя заключить, что негативное мышление вызывает деменцию или что отказ от негативных мыслей предотвращает её развитие.</p>
 
-    <h3 class="td2-h" style="left:583px;top:524px;">ЧТО ГОВОРИТ ИССЛЕДОВАНИЕ</h3>
-    <p class="td2-p" style="left:583px;top:570px;width:435px;">В работе 2020 года обнаружены статистические связи с когнитивным снижением и некоторыми биомаркерами болезни Альцгеймера. Причинность не установлена.</p>
+    <h3 class="td2-h" style="left:583px;top:414px;">ЧТО ГОВОРИТ ИССЛЕДОВАНИЕ</h3>
+    <!-- «Причинность не установлена.» — отдельная строка жирным (в макете
+         1982:974 это перенос + bold-ран) -->
+    <p class="td2-p" style="left:583px;top:460px;width:330px;">В работе 2020 года обнаружены статистические связи с когнитивным снижением и некоторыми биомаркерами болезни Альцгеймера.<br><b>Причинность не установлена.</b></p>
 
-    <h3 class="td2-h" style="left:583px;top:680px;">ГДЕ ГРАНИЦА ДОКАЗАТЕЛЬСТВ</h3>
-    <p class="td2-p" style="left:583px;top:726px;width:444px;">Нельзя заключить, что негативное мышление вызывает деменцию или что отказ от негативных мыслей предотвращает её развитие.</p>
+    <h3 class="td2-h" style="left:583px;top:580px;">ЧТО ИСКАЖЕНО</h3>
+    <!-- в макете (1982:971) «повторяющимсянегативным» склеено — опечатка
+         дизайнера (в старом тексте пробел был); здесь пробел оставлен:
+         переносы строк совпадают (строка 1 кончается «негативным» и так и так) -->
+    <p class="td2-p" style="left:583px;top:626px;width:615px;">Статья рассказывает о научной <b>гипотезе</b>, связанной с повторяющимся негативным мышлением, но подводит читателя к более уверенному выводу о возможном ускорении деменции.</p>
   </div>
 
   <!-- слой: ВЕРДИКТ (оранжевый экран, полосы доезжают до левого края).
@@ -530,22 +556,27 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 
 <!-- 11b. ВЫВОД (orange) -->
 <section class="sec sec-conclusion">
-  <h2 class="h40 caps" style="position:absolute;left:520px;top:100px;font-size:80px;line-height:80%;width:300px;">Вывод</h2>
+  <!-- мокап 1779:1027: «Вывод» 80px, lh 130.026% — это натуральные 1.3 у Plex Mono,
+       их даёт .caps (130%); инлайновый line-height-хак снят. top 73.2 — компенсация
+       полулидера+ascent−capHeight (26.8px): cap-топ «В» встаёт на y=100 макета
+       (плагин Figma отдаёт тайт-баунды: y = cap-топ, высота = (n−1)·LH + capHeight) -->
+  <h2 class="h40 caps" style="position:absolute;left:520px;top:73.2px;font-size:80px;width:300px;">Вывод</h2>
 
   <div class="concl-frame">
-    <span class="cf-dot" style="left:0;top:0;"></span>
-    <span class="cf-dot" style="right:0;top:0;"></span>
-    <span class="cf-dot" style="left:0;bottom:0;"></span>
-    <span class="cf-dot" style="right:0;bottom:0;"></span>
+    <span class="cf-dot" style="left:-1px;top:-1px;"></span>
+    <span class="cf-dot" style="right:-1px;top:-1px;"></span>
+    <span class="cf-dot" style="left:-1px;bottom:-1px;"></span>
+    <span class="cf-dot" style="right:-1px;bottom:-1px;"></span>
     <p class="concl-title">Оценивайте доказательства,<br>а не громкость заявления</p>
   </div>
 
-  <div class="concl-pill" style="left:132px;top:348px;">#учёные доказали</div>
-  <div class="concl-pill" style="left:334px;top:243px;">#эксперты выяснили</div>
-  <div class="concl-pill" style="left:238px;top:615px;">#исследование показало</div>
-  <div class="concl-pill inv" style="left:925px;top:331px;">#научный аргумент</div>
-  <div class="concl-pill inv" style="left:842px;top:464px;">#проверка</div>
-  <div class="concl-pill inv" style="left:825px;top:661px;">#первоисточник</div>
+  <!-- пилюли-теги по координатам мокапа 1779:1026 (ЦА-фреймы, top-left) -->
+  <div class="concl-pill" style="left:178px;top:330px;">#учёные доказали</div>
+  <div class="concl-pill" style="left:100px;top:180px;">#эксперты выяснили</div>
+  <div class="concl-pill" style="left:223px;top:640px;">#исследование показало</div>
+  <div class="concl-pill inv" style="left:956px;top:220px;">#научный аргумент</div>
+  <div class="concl-pill inv" style="left:933px;top:470px;">#проверка</div>
+  <div class="concl-pill inv" style="left:992px;top:700px;">#первоисточник</div>
 </section>
 
 <!-- 13. НАУКА СТАЛА ДЕКОРАЦИЕЙ -->
@@ -620,6 +651,7 @@ if (window.matchMedia && matchMedia('(max-width: 767px)').matches) {
 <script src="js/scale.js"></script>
 <script src="js/fades.js"></script>
 <script src="js/hero.js"></script>
+<script src="js/statement.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/teardown.js"></script>
 <script src="js/checklist.js"></script>
